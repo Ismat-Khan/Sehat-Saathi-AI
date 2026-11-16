@@ -3,10 +3,9 @@ import streamlit as st
 from PIL import Image
 from io import BytesIO
 
-from tools.report_tools import extract_pdf_text
-
+from utils.report_tools import extract_pdf_text
 from agents.medical_report_agent import analyze_report
-from agents.medicine_agent import analyze_medicine_image, analyze_medicine
+from agents.medicine_agent import analyze_medicine, analyze_medicine_image
 from agents.health_assistant_agent import health_chat
 from agents.health_summary_agent import create_summary
 from agents.diet_agent import create_diet_plan
@@ -14,9 +13,9 @@ from agents.safety_agent import check_emergency
 from agents.voice_agent import transcribe_audio, speak_response
 
 
-# -----------------------------------
+# ==========================================
 # PAGE CONFIGURATION
-# -----------------------------------
+# ==========================================
 
 st.set_page_config(
     page_title="Sehat Saathi AI",
@@ -25,108 +24,80 @@ st.set_page_config(
 )
 
 
-# -----------------------------------
-# THEME-AWARE DESIGN
-# Supports Light, Dark and System themes
-# -----------------------------------
+# ==========================================
+# AUTOMATIC LIGHT / DARK THEME CSS
+# ==========================================
 
 st.markdown("""
 <style>
 
-/* Use Streamlit's active theme colors */
-:root {
-    --ssa-bg: var(--background-color, #F4F8F7);
-    --ssa-secondary: var(--secondary-background-color, #E5F3EF);
-    --ssa-text: var(--text-color, #20343A);
-    --ssa-primary: var(--primary-color, #087F70);
-}
-
-/* Main application */
+/* Main application: follows selected Streamlit theme */
 .stApp {
-    background-color: var(--ssa-bg) !important;
-    color: var(--ssa-text) !important;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
+/* Main content */
 [data-testid="stAppViewContainer"] {
-    background-color: var(--ssa-bg) !important;
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
-/* Header */
-[data-testid="stHeader"] {
-    background-color: var(--ssa-bg);
+[data-testid="stAppViewContainer"] .main {
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
-/* All ordinary text follows the active theme */
-[data-testid="stMarkdownContainer"] p,
-[data-testid="stMarkdownContainer"] li,
-[data-testid="stMarkdownContainer"] h1,
-[data-testid="stMarkdownContainer"] h2,
-[data-testid="stMarkdownContainer"] h3,
-[data-testid="stMarkdownContainer"] strong,
-[data-testid="stMarkdownContainer"] em {
-    color: var(--ssa-text);
+/* Headings and normal text */
+[data-testid="stAppViewContainer"] .main h1,
+[data-testid="stAppViewContainer"] .main h2,
+[data-testid="stAppViewContainer"] .main h3,
+[data-testid="stAppViewContainer"] .main p,
+[data-testid="stAppViewContainer"] .main li,
+[data-testid="stAppViewContainer"] .main label {
+    color: var(--text-color);
 }
 
 /* Main title */
 .main-title {
-    color: var(--ssa-primary) !important;
+    color: var(--primary-color) !important;
     font-size: 38px;
     font-weight: 800;
 }
 
 /* Subtitle */
 .subtitle {
-    color: var(--ssa-text) !important;
+    color: var(--text-color) !important;
     opacity: 0.8;
     font-size: 16px;
 }
 
-/* Sidebar follows the active theme */
+/* Sidebar */
 [data-testid="stSidebar"] {
-    background-color: var(--ssa-secondary) !important;
+    background-color: var(--secondary-background-color);
 }
 
 /* Sidebar text */
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] *,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
 [data-testid="stSidebar"] label,
-[data-testid="stSidebar"] [role="radiogroup"] * {
-    color: var(--ssa-text) !important;
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    color: var(--text-color) !important;
 }
 
 /* Sidebar title */
 [data-testid="stSidebar"] h1 {
-    color: var(--ssa-primary) !important;
+    color: var(--primary-color) !important;
     font-weight: 800;
 }
 
-/* Input fields */
-.stTextInput input,
-.stTextArea textarea,
-.stNumberInput input,
-[data-testid="stChatInput"] textarea {
-    background-color: var(--ssa-secondary) !important;
-    color: var(--ssa-text) !important;
-    border: 1px solid rgba(128, 128, 128, 0.45) !important;
-    border-radius: 8px;
-}
-
-/* Input placeholders */
-.stTextInput input::placeholder,
-.stTextArea textarea::placeholder,
-[data-testid="stChatInput"] textarea::placeholder {
-    color: var(--ssa-text) !important;
-    opacity: 0.6;
-}
-
-/* Select box */
-[data-baseweb="select"] > div {
-    background-color: var(--ssa-secondary) !important;
-    color: var(--ssa-text) !important;
-    border-color: rgba(128, 128, 128, 0.45) !important;
-}
-
-[data-baseweb="select"] * {
-    color: var(--ssa-text) !important;
+/* Sidebar navigation */
+[data-testid="stSidebar"] [role="radiogroup"] label,
+[data-testid="stSidebar"] [role="radiogroup"] label p,
+[data-testid="stSidebar"] [role="radiogroup"] label span {
+    color: var(--text-color) !important;
 }
 
 /* Input labels */
@@ -135,42 +106,89 @@ st.markdown("""
 .stSelectbox label,
 .stNumberInput label,
 .stFileUploader label {
-    color: var(--ssa-text) !important;
+    color: var(--text-color) !important;
     font-weight: 600;
 }
 
-/* Buttons: preserve Streamlit's theme-aware colors */
+/* Text input fields */
+.stTextInput input,
+.stTextArea textarea,
+.stNumberInput input,
+[data-testid="stChatInput"] textarea {
+    background-color: var(--secondary-background-color) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--primary-color) !important;
+    border-radius: 8px;
+}
+
+/* Input placeholders */
+.stTextInput input::placeholder,
+.stTextArea textarea::placeholder,
+[data-testid="stChatInput"] textarea::placeholder {
+    color: var(--text-color) !important;
+    opacity: 0.6;
+}
+
+/* Dropdown fields */
+.stSelectbox [data-baseweb="select"] > div {
+    background-color: var(--secondary-background-color) !important;
+    color: var(--text-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* Dropdown menu */
+[data-baseweb="popover"],
+[data-baseweb="menu"] {
+    background-color: var(--secondary-background-color) !important;
+    color: var(--text-color) !important;
+}
+
+[data-baseweb="menu"] li {
+    color: var(--text-color) !important;
+}
+
+/* Buttons: retain Streamlit theme's accessible colors */
 div.stButton > button {
     border-radius: 10px;
     font-weight: 600;
 }
 
-/* Upload area */
+/* File uploader */
 [data-testid="stFileUploader"] {
-    border: 1px dashed var(--ssa-primary);
+    background-color: var(--secondary-background-color);
+    border: 1px dashed var(--primary-color);
     border-radius: 12px;
-    padding: 8px;
+    padding: 10px;
 }
 
-/* Chat messages: let Streamlit choose theme colors */
+/* Chat messages */
 [data-testid="stChatMessage"] {
+    background-color: var(--secondary-background-color);
+    color: var(--text-color);
+    border: 1px solid var(--primary-color);
     border-radius: 14px;
-    border: 1px solid rgba(128, 128, 128, 0.25);
 }
 
-/* Alerts: preserve native light/dark contrast */
+/* Chat message text */
+[data-testid="stChatMessage"] p,
+[data-testid="stChatMessage"] li {
+    color: var(--text-color);
+}
+
+/* Alerts */
 [data-testid="stAlert"] {
     border-radius: 12px;
 }
 
-/* Links */
-a {
-    color: var(--ssa-primary) !important;
-}
-
 /* Dividers */
 hr {
-    border-color: rgba(128, 128, 128, 0.3);
+    border-color: var(--text-color);
+    opacity: 0.2;
+}
+
+/* Links */
+a {
+    color: var(--primary-color) !important;
 }
 
 /* Footer */
@@ -182,9 +200,9 @@ footer {
 """, unsafe_allow_html=True)
 
 
-# -----------------------------------
+# ==========================================
 # SESSION STATE
-# -----------------------------------
+# ==========================================
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -192,10 +210,13 @@ if "messages" not in st.session_state:
 if "language" not in st.session_state:
     st.session_state.language = "English"
 
+if "report_result" not in st.session_state:
+    st.session_state.report_result = ""
 
-# -----------------------------------
+
+# ==========================================
 # SIDEBAR
-# -----------------------------------
+# ==========================================
 
 with st.sidebar:
 
@@ -229,31 +250,14 @@ with st.sidebar:
 
     st.caption("Powered by Groq AI")
 
-    if st.button("Clear Chat History"):
+    if st.button("Clear Chat History", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
 
-# -----------------------------------
-# LANGUAGE LABELS
-# -----------------------------------
-
-if language == "Urdu":
-
-    welcome = "آپ کا صحت کا ساتھی"
-    subtitle = "آپ کی صحت، آپ کی زبان، آپ کا ساتھی"
-    description = "اپنی صحت کے بارے میں آسان معلومات حاصل کریں۔"
-
-else:
-
-    welcome = "Your Health Companion"
-    subtitle = "Your Health, Your Language, Your Companion."
-    description = "Understand your health with AI-powered assistance."
-
-
-# -----------------------------------
+# ==========================================
 # HOME PAGE
-# -----------------------------------
+# ==========================================
 
 if page == "Home":
 
@@ -262,14 +266,14 @@ if page == "Home":
         unsafe_allow_html=True
     )
 
-    st.markdown(f"### {welcome}")
-
-    st.markdown(
-        f'<div class="subtitle">{subtitle}</div>',
-        unsafe_allow_html=True
-    )
-
-    st.write(description)
+    if language == "Urdu":
+        st.subheader("آپ کا صحت کا ساتھی")
+        st.write("اپنی صحت کے بارے میں آسان معلومات حاصل کریں۔")
+    else:
+        st.subheader("Your Intelligent Healthcare Companion")
+        st.write(
+            "Understand your health with AI-powered assistance."
+        )
 
     st.divider()
 
@@ -278,61 +282,68 @@ if page == "Home":
     with col1:
 
         st.info(
-            "🩻 **Medical Reports**\n\n"
-            "Upload your medical reports or X-rays."
+            "**🩻 Medical Report Analysis**\n\n"
+            "Upload medical reports and images "
+            "to receive easy explanations."
         )
 
         st.success(
-            "💊 **Medicine Scanner**\n\n"
-            "Understand medicine labels and information."
+            "**💊 Medicine Scanner**\n\n"
+            "Upload medicine packaging to examine "
+            "visible medicine information."
         )
 
         st.info(
-            "🥗 **Diet & Nutrition**\n\n"
-            "Get general personalized diet guidance."
+            "**🥗 Diet & Nutrition**\n\n"
+            "Get general nutrition guidance "
+            "with Pakistani food options."
         )
 
     with col2:
 
         st.success(
-            "💬 **AI Health Chat**\n\n"
-            "Ask healthcare-related questions."
+            "**💬 AI Health Chat**\n\n"
+            "Ask general healthcare questions "
+            "in English or Urdu."
         )
 
         st.info(
-            "📋 **Health Summary**\n\n"
-            "Create easy-to-understand health summaries."
+            "**📋 Health Summary**\n\n"
+            "Turn medical report information "
+            "into an easy-to-understand summary."
         )
 
         st.success(
-            "🎙️ **Voice Assistant**\n\n"
-            "Speak with your healthcare assistant."
+            "**🎙️ Voice Assistant**\n\n"
+            "Speak your questions and listen "
+            "to AI-generated responses."
         )
 
     st.divider()
 
     st.warning(
-        "Sehat Saathi AI provides educational information. "
-        "It is not a replacement for doctors, radiologists, "
-        "pharmacists or emergency medical services."
+        "Sehat Saathi AI provides educational health information. "
+        "It does not replace doctors, radiologists, pharmacists "
+        "or emergency medical services."
     )
 
 
-# -----------------------------------
+# ==========================================
 # MEDICAL REPORT ANALYSIS
-# -----------------------------------
+# ==========================================
 
 elif page == "Medical Report Analysis":
 
     st.title("🩻 Medical Report Analysis")
 
     st.write(
-        "Upload an X-ray, medical image or PDF report."
+        "Upload a medical report, X-ray or medical image."
     )
 
     uploaded_file = st.file_uploader(
         "Upload your medical file",
-        type=["png", "jpg", "jpeg", "webp", "pdf"]
+        type=["png", "jpg", "jpeg", "webp", "pdf"],
+        key="medical_upload"
     )
 
     if uploaded_file:
@@ -343,7 +354,7 @@ elif page == "Medical Report Analysis":
 
         if is_pdf:
 
-            with st.spinner("Reading medical report..."):
+            with st.spinner("Reading your medical report..."):
 
                 extracted_text = extract_pdf_text(file_bytes)
 
@@ -357,17 +368,20 @@ elif page == "Medical Report Analysis":
 
             if st.button("Analyze Medical Report"):
 
-                with st.spinner("Analyzing report..."):
+                with st.spinner("Analyzing your report..."):
 
                     result = analyze_report(
                         extracted_text,
-                        language
+                        language,
+                        is_image=False
                     )
 
                     st.session_state.report_result = result
 
-                st.subheader("Medical Explanation")
-                st.write(result)
+            if st.session_state.report_result:
+
+                st.subheader("Medical Report Explanation")
+                st.write(st.session_state.report_result)
 
         else:
 
@@ -379,7 +393,7 @@ elif page == "Medical Report Analysis":
 
             if st.button("Analyze Medical Image"):
 
-                with st.spinner("Analyzing image..."):
+                with st.spinner("Analyzing medical image..."):
 
                     image = Image.open(
                         BytesIO(file_bytes)
@@ -401,50 +415,48 @@ elif page == "Medical Report Analysis":
 
                     st.session_state.report_result = result
 
-                st.subheader("AI Image Explanation")
-                st.write(result)
+            if st.session_state.report_result:
 
-        if st.button("Create Health Summary"):
+                st.subheader("Medical Image Explanation")
+                st.write(st.session_state.report_result)
 
-            previous_result = st.session_state.get(
-                "report_result",
-                ""
-            )
+        if st.session_state.report_result:
 
-            if previous_result:
+            if st.button("Create Health Summary"):
 
-                with st.spinner("Creating summary..."):
+                with st.spinner("Creating your summary..."):
 
                     summary = create_summary(
-                        previous_result,
+                        st.session_state.report_result,
                         language
                     )
 
                 st.subheader("Health Summary")
                 st.write(summary)
 
-            else:
+    st.caption(
+        "Medical image analysis is experimental. "
+        "A qualified radiologist must interpret X-rays."
+    )
 
-                st.warning(
-                    "Please analyze a report or image first."
-                )
 
-
-# -----------------------------------
+# ==========================================
 # MEDICINE SCANNER
-# -----------------------------------
+# ==========================================
 
 elif page == "Medicine Scanner":
 
     st.title("💊 Medicine Information Scanner")
 
     st.write(
-        "Upload a clear picture of your medicine packaging."
+        "Upload a clear medicine package picture "
+        "or enter the medicine name."
     )
 
     medicine_image = st.file_uploader(
         "Upload Medicine Picture",
-        type=["png", "jpg", "jpeg", "webp"]
+        type=["png", "jpg", "jpeg", "webp"],
+        key="medicine_upload"
     )
 
     medicine_name = st.text_input(
@@ -455,75 +467,107 @@ elif page == "Medicine Scanner":
 
         st.image(
             medicine_image,
-            caption="Medicine image",
+            caption="Uploaded medicine picture",
             width=350
         )
 
     if st.button("Identify Medicine"):
 
-        if medicine_image or medicine_name.strip():
+        if medicine_image:
 
-            with st.spinner("Checking medicine information..."):
+            with st.spinner("Reading medicine packaging..."):
 
-                if medicine_image:
+                image = Image.open(
+                    BytesIO(medicine_image.getvalue())
+                ).convert("RGB")
 
-                    image = Image.open(
-                        BytesIO(medicine_image.getvalue())
-                    ).convert("RGB")
+                buffer = BytesIO()
 
-                    buffer = BytesIO()
+                image.save(
+                    buffer,
+                    format="JPEG",
+                    quality=85
+                )
 
-                    image.save(
-                        buffer,
-                        format="JPEG"
-                    )
-
-                    result = analyze_medicine_image(
-                        buffer.getvalue(),
-                        language
-                    )
-
-                else:
-
-                    result = analyze_medicine(
-                        medicine_name,
-                        language
-                    )
+                result = analyze_medicine_image(
+                    buffer.getvalue(),
+                    language
+                )
 
             st.subheader("Medicine Information")
             st.write(result)
 
-            st.warning(
-                "Always verify medicine information with a pharmacist. "
-                "Do not change medication based on AI output."
-            )
+        elif medicine_name.strip():
+
+            with st.spinner("Checking medicine information..."):
+
+                result = analyze_medicine(
+                    medicine_name,
+                    language
+                )
+
+            st.subheader("Medicine Information")
+            st.write(result)
 
         else:
 
             st.warning(
-                "Please upload a medicine image or enter its name."
+                "Please upload a medicine picture "
+                "or enter a medicine name."
             )
 
+    st.warning(
+        "AI medicine identification can be incorrect. "
+        "Always verify medicine details with a pharmacist. "
+        "Do not change your medication based on AI output."
+    )
 
-# -----------------------------------
+
+# ==========================================
 # AI HEALTH CHAT
-# -----------------------------------
+# ==========================================
 
 elif page == "AI Health Chat":
 
-    st.title("💬 Sehat Saathi AI Assistant")
+    st.title("💬 Sehat Saathi AI Health Assistant")
 
     st.write(
-        "Ask your health questions or talk using your microphone."
+        "Ask general healthcare questions in English or Urdu."
     )
 
-    # Display previous conversation
+    # Display conversation history
 
     for message in st.session_state.messages:
 
         with st.chat_message(message["role"]):
-
             st.write(message["content"])
+
+    # Voice input
+
+    audio = st.audio_input(
+        "🎙️ Record your health question"
+    )
+
+    if audio and st.button("Process Voice Message"):
+
+        with st.spinner("Converting your voice to text..."):
+
+            transcribed_text = transcribe_audio(
+                audio.getvalue(),
+                language
+            )
+
+        if transcribed_text and not transcribed_text.startswith(
+            "Voice recognition error:"
+        ) and not transcribed_text.startswith(
+            "Groq API key is missing"
+        ):
+
+            st.session_state.voice_question = transcribed_text
+
+        else:
+
+            st.error(transcribed_text)
 
     # Text input
 
@@ -531,23 +575,16 @@ elif page == "AI Health Chat":
         "Ask your health question..."
     )
 
-    # Voice input
+    # Use transcribed voice if available
 
-    audio = st.audio_input(
-        "Or record your question"
+    voice_question = st.session_state.pop(
+        "voice_question",
+        None
     )
 
-    if audio and st.button("Process Voice Message"):
-
-        with st.spinner("Converting voice to text..."):
-
-            question = transcribe_audio(
-                audio.getvalue(),
-                language
-            )
-
-        st.write("Recognized speech:")
-        st.write(question)
+    if voice_question:
+        question = voice_question
+        st.write("Recognized speech:", question)
 
     if question:
 
@@ -557,16 +594,16 @@ elif page == "AI Health Chat":
 
                 st.error(
                     "ممکنہ طبی ایمرجنسی۔ "
-                    "فوراً اپنے مقامی ایمرجنسی نمبر پر رابطہ کریں "
-                    "یا قریبی ایمرجنسی ڈیپارٹمنٹ جائیں۔"
+                    "فوراً مقامی ایمرجنسی سروس سے رابطہ کریں "
+                    "یا قریبی ہسپتال جائیں۔"
                 )
 
             else:
 
                 st.error(
-                    "Possible medical emergency. Contact "
-                    "your local emergency services or go to "
-                    "the nearest emergency department immediately."
+                    "Possible medical emergency. "
+                    "Contact local emergency services "
+                    "or go to the nearest emergency department immediately."
                 )
 
         else:
@@ -591,6 +628,8 @@ elif page == "AI Health Chat":
 
             st.rerun()
 
+    # Speak the last assistant response
+
     if st.session_state.messages:
 
         last_message = st.session_state.messages[-1]
@@ -599,7 +638,7 @@ elif page == "AI Health Chat":
 
             if st.button("🔊 Speak Last Response"):
 
-                with st.spinner("Generating voice..."):
+                with st.spinner("Generating speech..."):
 
                     audio_bytes = speak_response(
                         last_message["content"],
@@ -618,16 +657,17 @@ elif page == "AI Health Chat":
                     st.error("Voice generation failed.")
 
 
-# -----------------------------------
+# ==========================================
 # DIET AND NUTRITION
-# -----------------------------------
+# ==========================================
 
 elif page == "Diet & Nutrition":
 
     st.title("🥗 AI Diet & Nutrition Assistant")
 
     st.write(
-        "Get general food and nutrition guidance."
+        "Get general nutrition guidance "
+        "with practical Pakistani food options."
     )
 
     age = st.number_input(
@@ -665,12 +705,12 @@ elif page == "Diet & Nutrition":
 
     conditions = st.text_area(
         "Relevant medical conditions (optional)",
-        placeholder="Example: diabetes, kidney disease, pregnancy"
+        placeholder="Example: diabetes, kidney disease"
     )
 
     if st.button("Generate My Diet Plan"):
 
-        with st.spinner("Creating your diet plan..."):
+        with st.spinner("Preparing your diet plan..."):
 
             result = create_diet_plan(
                 age,
@@ -686,14 +726,14 @@ elif page == "Diet & Nutrition":
 
         st.warning(
             "This is general nutrition guidance, not a medical "
-            "prescription. Consult a qualified dietitian for "
-            "medical dietary requirements."
+            "prescription. Consult a qualified dietitian "
+            "for medical dietary requirements."
         )
 
 
-# -----------------------------------
+# ==========================================
 # HEALTH SUMMARY
-# -----------------------------------
+# ==========================================
 
 elif page == "Health Summary":
 
@@ -701,19 +741,20 @@ elif page == "Health Summary":
 
     st.write(
         "Paste your medical report information "
-        "to generate a simple summary."
+        "to generate a simple health summary."
     )
 
     report = st.text_area(
-        "Paste your report details",
-        height=250
+        "Paste your medical report details",
+        height=250,
+        placeholder="Paste your report text here..."
     )
 
     if st.button("Generate Health Summary"):
 
         if report.strip():
 
-            with st.spinner("Generating summary..."):
+            with st.spinner("Generating your summary..."):
 
                 summary = create_summary(
                     report,
@@ -726,17 +767,21 @@ elif page == "Health Summary":
         else:
 
             st.warning(
-                "Please enter your report information."
+                "Please enter your medical report information."
             )
 
 
-# -----------------------------------
+# ==========================================
 # FOOTER
-# -----------------------------------
+# ==========================================
 
 st.divider()
 
 st.caption(
-    "💚 Sehat Saathi AI | Bilingual Healthcare Assistant | "
-    "For educational purposes only."
+    "💚 Sehat Saathi AI | Bilingual Healthcare Assistant"
+)
+
+st.caption(
+    "For educational purposes only. "
+    "Not a replacement for professional medical advice."
 )
