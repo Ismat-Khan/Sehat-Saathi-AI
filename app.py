@@ -34,40 +34,158 @@ st.set_page_config(
 st.markdown("""
 <style>
 
+/* Main page */
 .stApp {
-    background-color: #F5FAF9;
+    background-color: #F4F8F7;
+    color: #20343A;
 }
 
-[data-testid="stSidebar"] {
-    background-color: #E8F4F1;
+/* Main content typography */
+[data-testid="stAppViewContainer"] .main,
+[data-testid="stAppViewContainer"] .main p,
+[data-testid="stAppViewContainer"] .main li,
+[data-testid="stAppViewContainer"] .main label,
+[data-testid="stAppViewContainer"] .main h1,
+[data-testid="stAppViewContainer"] .main h2,
+[data-testid="stAppViewContainer"] .main h3,
+[data-testid="stAppViewContainer"] .main [data-testid="stMarkdownContainer"] {
+    color: #20343A;
 }
 
 .main-title {
-    color: #168F83;
+    color: #087F70 !important;
     font-size: 38px;
     font-weight: 800;
 }
 
 .subtitle {
-    color: #617B77;
+    color: #47635F !important;
     font-size: 16px;
 }
 
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: #E4F1ED;
+}
+
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h1,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h2,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+    color: #183C38 !important;
+}
+
+[data-testid="stSidebar"] h1 {
+    color: #087F70 !important;
+    font-weight: 800;
+}
+
+/* Sidebar navigation */
+[data-testid="stSidebar"] [role="radiogroup"] label,
+[data-testid="stSidebar"] [role="radiogroup"] label p,
+[data-testid="stSidebar"] [role="radiogroup"] label span {
+    color: #183C38 !important;
+}
+
+/* Form labels */
+.stTextInput label,
+.stTextArea label,
+.stSelectbox label,
+.stNumberInput label,
+.stFileUploader label,
+.stAudioInput label {
+    color: #183C38 !important;
+    font-weight: 600;
+}
+
+/* Text fields */
+.stTextInput input,
+.stTextArea textarea,
+.stNumberInput input {
+    background-color: #FFFFFF !important;
+    color: #20343A !important;
+    border: 1px solid #B8D1CA !important;
+    border-radius: 8px;
+}
+
+.stTextInput input::placeholder,
+.stTextArea textarea::placeholder {
+    color: #718783 !important;
+}
+
+/* Select boxes */
+.stSelectbox [data-baseweb="select"] > div {
+    background-color: #FFFFFF !important;
+    color: #20343A !important;
+    border-color: #B8D1CA !important;
+}
+
+/* Buttons */
 div.stButton > button {
-    background-color: #159C91;
-    color: white;
-    border-radius: 12px;
-    border: none;
+    background-color: #087F70 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #087F70 !important;
+    border-radius: 10px;
     padding: 10px 20px;
+    font-weight: 600;
 }
 
 div.stButton > button:hover {
-    background-color: #087E75;
-    color: white;
+    background-color: #06675C !important;
+    border-color: #06675C !important;
+    color: #FFFFFF !important;
 }
 
+/* Information, success and warning panels */
+[data-testid="stAlert"] {
+    border-radius: 12px;
+}
+
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] div {
+    color: #20343A !important;
+}
+
+/* Uploaded file area */
+[data-testid="stFileUploader"] {
+    background-color: #FFFFFF;
+    border: 1px dashed #91B9AE;
+    border-radius: 12px;
+    padding: 8px;
+}
+
+[data-testid="stFileUploader"] * {
+    color: #20343A;
+}
+
+/* Chat bubbles */
 [data-testid="stChatMessage"] {
+    background-color: #FFFFFF;
+    border: 1px solid #D8E6E1;
     border-radius: 14px;
+}
+
+/* Chat input */
+[data-testid="stChatInput"] textarea {
+    background-color: #FFFFFF !important;
+    color: #20343A !important;
+}
+
+/* Dividers and links */
+hr {
+    border-color: #B8CEC7;
+}
+
+a {
+    color: #087F70 !important;
+}
+
+/* Hide Streamlit's default footer */
+footer {
+    visibility: hidden;
 }
 
 </style>
