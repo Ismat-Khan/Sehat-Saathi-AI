@@ -3,7 +3,7 @@ import streamlit as st
 from PIL import Image
 from io import BytesIO
 
-from utils.report_tools import extract_pdf_text
+from tools.report_tools import extract_pdf_text
 from agents.medical_report_agent import analyze_report
 from agents.medicine_agent import analyze_medicine, analyze_medicine_image
 from agents.health_assistant_agent import health_chat
