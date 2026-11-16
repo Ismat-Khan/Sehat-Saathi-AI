@@ -144,10 +144,6 @@ defaults = {
     "messages": [],
     "language": "English",
     "report_result": "",
-    "chat_text": "",
-    "chat_mic_version": 0,
-    "mic_open": False,
-    "clear_chat_text": False,
     "spoken_audio": None,
     "spoken_message_index": None
 }
@@ -156,15 +152,6 @@ for key, value in defaults.items():
 
     if key not in st.session_state:
         st.session_state[key] = value
-
-
-# Clear the text BEFORE creating the text input widget.
-# This avoids StreamlitWidgetAlreadyInstantiatedError.
-
-if st.session_state.clear_chat_text:
-
-    st.session_state.chat_text = ""
-    st.session_state.clear_chat_text = False
 
 
 # ==========================================
@@ -178,7 +165,7 @@ def submit_chat_question(question, language):
     if not question:
         return
 
-    # Emergency keyword check
+    # Basic emergency keyword check
     if check_emergency(question):
 
         if language == "Urdu":
@@ -206,9 +193,6 @@ def submit_chat_question(question, language):
             "content": emergency_message
         })
 
-        st.session_state.spoken_audio = None
-        st.session_state.spoken_message_index = None
-
         return
 
     previous_messages = st.session_state.messages.copy()
@@ -230,9 +214,6 @@ def submit_chat_question(question, language):
         "role": "assistant",
         "content": answer
     })
-
-    st.session_state.spoken_audio = None
-    st.session_state.spoken_message_index = None
 
 
 # ==========================================
@@ -274,12 +255,8 @@ with st.sidebar:
     if st.button("Clear Chat History", use_container_width=True):
 
         st.session_state.messages = []
-        st.session_state.chat_text = ""
-        st.session_state.clear_chat_text = False
         st.session_state.spoken_audio = None
         st.session_state.spoken_message_index = None
-        st.session_state.mic_open = False
-        st.session_state.chat_mic_version += 1
 
         st.rerun()
 
@@ -554,7 +531,7 @@ elif page == "Medicine Scanner":
 
 
 # ==========================================
-# AI HEALTH CHAT
+# AI HEALTH CHAT — INTEGRATED MICROPHONE
 # ==========================================
 
 elif page == "AI Health Chat":
@@ -575,6 +552,7 @@ elif page == "AI Health Chat":
 
             st.write(message["content"])
 
+            # Read aloud option for AI responses
             if message["role"] == "assistant":
 
                 if st.button(
@@ -601,6 +579,7 @@ elif page == "AI Health Chat":
                             "Voice generation failed. Please try again."
                         )
 
+                # Show audio player for selected response
                 if st.session_state.spoken_message_index == i:
 
                     if st.session_state.spoken_audio:
@@ -610,128 +589,67 @@ elif page == "AI Health Chat":
                             format="audio/mp3"
                         )
 
-    st.divider()
-
     # --------------------------------------
-    # MICROPHONE BUTTON
+    # CHAT INPUT WITH BUILT-IN MICROPHONE
     # --------------------------------------
 
-    mic_col, text_col, send_col = st.columns(
-        [1, 8, 1],
-        vertical_alignment="bottom"
+    prompt = st.chat_input(
+        "Ask anything about your health...",
+        accept_audio=True,
+        audio_sample_rate=16000,
+        key="health_chat_input"
     )
 
-    with mic_col:
-
-        if st.button(
-            "🎙️",
-            key="toggle_microphone",
-            help="Record your voice",
-            use_container_width=True
-        ):
-
-            st.session_state.mic_open = not st.session_state.mic_open
-
-            st.rerun()
-
     # --------------------------------------
-    # VOICE RECORDER
+    # PROCESS USER SUBMISSION
     # --------------------------------------
 
-    # IMPORTANT:
-    # Process audio BEFORE creating the text input.
-    # This prevents changing the text input state
-    # after Streamlit has instantiated that widget.
+    if prompt:
 
-    if st.session_state.mic_open:
+        question = ""
 
-        st.caption("🎙️ Record your health question")
+        # If the user recorded a voice message
+        if prompt.audio:
 
-        audio = st.audio_input(
-            "Record your question",
-            key=f"chat_mic_{st.session_state.chat_mic_version}"
-        )
+            with st.spinner("Converting your voice into text..."):
 
-        if audio:
-
-            with st.spinner("Converting your voice to text..."):
-
-                transcription = transcribe_audio(
-                    audio.getvalue(),
+                question = transcribe_audio(
+                    prompt.audio.getvalue(),
                     language
                 )
 
             if (
-                transcription
-                and not transcription.startswith("Voice recognition error:")
-                and not transcription.startswith("Groq API key is missing")
+                not question
+                or question.startswith("Voice recognition error:")
+                or question.startswith("Groq API key is missing")
             ):
 
-                st.session_state.chat_text = transcription
+                st.error(
+                    question or "Could not recognize your voice."
+                )
 
-                st.session_state.mic_open = False
+                st.stop()
 
-                st.session_state.chat_mic_version += 1
+            st.caption("🎙️ Voice transcription: " + question)
 
-                st.rerun()
+        # If the user typed a message
+        elif prompt.text:
 
-            else:
+            question = prompt.text.strip()
 
-                st.error(transcription)
+        # Send the question to the AI
+        if question:
 
-    # --------------------------------------
-    # TEXT INPUT
-    # --------------------------------------
+            submit_chat_question(
+                question,
+                language
+            )
 
-    with text_col:
+            st.session_state.spoken_audio = None
 
-        question = st.text_input(
-            "Message",
-            placeholder="Ask anything about your health...",
-            label_visibility="collapsed",
-            key="chat_text"
-        )
+            st.session_state.spoken_message_index = None
 
-    # --------------------------------------
-    # SEND BUTTON
-    # --------------------------------------
-
-    with send_col:
-
-        send_clicked = st.button(
-            "➤",
-            key="send_chat_message",
-            help="Send your question",
-            type="primary",
-            use_container_width=True
-        )
-
-    # --------------------------------------
-    # PROCESS QUESTION
-    # --------------------------------------
-
-    if send_clicked and question.strip():
-
-        submit_chat_question(
-            question,
-            language
-        )
-
-        # Clear the message on the NEXT rerun,
-        # before the text input widget is created.
-
-        st.session_state.clear_chat_text = True
-
-        st.session_state.mic_open = False
-        st.session_state.spoken_audio = None
-        st.session_state.spoken_message_index = None
-
-        st.rerun()
-
-    st.caption(
-        "Use 🎙️ to speak or type your question. "
-        "Your voice will be converted into text before sending."
-    )
+            st.rerun()
 
 
 # ==========================================
