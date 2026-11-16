@@ -26,7 +26,7 @@ st.set_page_config(
 
 
 # ==========================================
-# AUTOMATIC LIGHT AND DARK MODE
+# LIGHT AND DARK MODE STYLING
 # ==========================================
 
 st.markdown("""
@@ -57,14 +57,6 @@ st.markdown("""
     font-weight: 800;
 }
 
-.subtitle {
-    color: var(--text-color) !important;
-    opacity: 0.8;
-    font-size: 16px;
-}
-
-/* Sidebar */
-
 [data-testid="stSidebar"] {
     background-color: var(--secondary-background-color);
 }
@@ -83,25 +75,13 @@ st.markdown("""
     font-weight: 800;
 }
 
-/* Input fields */
-
-.stTextInput label,
-.stTextArea label,
-.stSelectbox label,
-.stNumberInput label,
-.stFileUploader label {
-    color: var(--text-color) !important;
-    font-weight: 600;
-}
-
 .stTextInput input,
 .stTextArea textarea,
-.stNumberInput input,
-[data-testid="stChatInput"] textarea {
+.stNumberInput input {
     background-color: var(--secondary-background-color) !important;
     color: var(--text-color) !important;
     border: 1px solid var(--primary-color) !important;
-    border-radius: 8px;
+    border-radius: 10px;
 }
 
 .stTextInput input::placeholder,
@@ -110,22 +90,16 @@ st.markdown("""
     opacity: 0.6;
 }
 
-/* Dropdown */
-
 .stSelectbox [data-baseweb="select"] > div {
     background-color: var(--secondary-background-color) !important;
     color: var(--text-color) !important;
     border-color: var(--primary-color) !important;
 }
 
-/* Buttons */
-
 div.stButton > button {
     border-radius: 10px;
     font-weight: 600;
 }
-
-/* File uploader */
 
 [data-testid="stFileUploader"] {
     background-color: var(--secondary-background-color);
@@ -134,8 +108,6 @@ div.stButton > button {
     padding: 10px;
 }
 
-/* Chat messages */
-
 [data-testid="stChatMessage"] {
     background-color: var(--secondary-background-color);
     color: var(--text-color);
@@ -143,20 +115,14 @@ div.stButton > button {
     border-radius: 14px;
 }
 
-/* Alerts */
-
 [data-testid="stAlert"] {
     border-radius: 12px;
 }
-
-/* Dividers */
 
 hr {
     border-color: var(--text-color);
     opacity: 0.2;
 }
-
-/* Links */
 
 a {
     color: var(--primary-color) !important;
@@ -180,13 +146,25 @@ defaults = {
     "report_result": "",
     "chat_text": "",
     "chat_mic_version": 0,
+    "mic_open": False,
+    "clear_chat_text": False,
     "spoken_audio": None,
     "spoken_message_index": None
 }
 
 for key, value in defaults.items():
+
     if key not in st.session_state:
         st.session_state[key] = value
+
+
+# Clear the text BEFORE creating the text input widget.
+# This avoids StreamlitWidgetAlreadyInstantiatedError.
+
+if st.session_state.clear_chat_text:
+
+    st.session_state.chat_text = ""
+    st.session_state.clear_chat_text = False
 
 
 # ==========================================
@@ -200,15 +178,18 @@ def submit_chat_question(question, language):
     if not question:
         return
 
-    # Check possible emergency symptoms
+    # Emergency keyword check
     if check_emergency(question):
 
         if language == "Urdu":
+
             emergency_message = (
                 "ممکنہ طبی ایمرجنسی۔ فوراً مقامی ایمرجنسی سروس "
                 "سے رابطہ کریں یا قریبی ہسپتال کے ایمرجنسی ڈیپارٹمنٹ جائیں۔"
             )
+
         else:
+
             emergency_message = (
                 "Possible medical emergency. Contact local emergency "
                 "services or go to the nearest emergency department "
@@ -294,8 +275,10 @@ with st.sidebar:
 
         st.session_state.messages = []
         st.session_state.chat_text = ""
+        st.session_state.clear_chat_text = False
         st.session_state.spoken_audio = None
         st.session_state.spoken_message_index = None
+        st.session_state.mic_open = False
         st.session_state.chat_mic_version += 1
 
         st.rerun()
@@ -571,7 +554,7 @@ elif page == "Medicine Scanner":
 
 
 # ==========================================
-# AI HEALTH CHAT — CHATGPT STYLE
+# AI HEALTH CHAT
 # ==========================================
 
 elif page == "AI Health Chat":
@@ -592,13 +575,11 @@ elif page == "AI Health Chat":
 
             st.write(message["content"])
 
-            # Read aloud below each AI response
             if message["role"] == "assistant":
 
                 if st.button(
                     "🔊 Read aloud",
-                    key=f"read_aloud_{i}",
-                    help="Listen to this AI response"
+                    key=f"read_aloud_{i}"
                 ):
 
                     with st.spinner("Preparing voice..."):
@@ -617,10 +598,9 @@ elif page == "AI Health Chat":
                     else:
 
                         st.error(
-                            "Could not generate voice. Please try again."
+                            "Voice generation failed. Please try again."
                         )
 
-                # Display audio player for selected response
                 if st.session_state.spoken_message_index == i:
 
                     if st.session_state.spoken_audio:
@@ -630,57 +610,79 @@ elif page == "AI Health Chat":
                             format="audio/mp3"
                         )
 
-    # --------------------------------------
-    # MESSAGE COMPOSER
-    # --------------------------------------
-
     st.divider()
 
+    # --------------------------------------
+    # MICROPHONE BUTTON
+    # --------------------------------------
+
     mic_col, text_col, send_col = st.columns(
-        [1, 7, 1],
+        [1, 8, 1],
         vertical_alignment="bottom"
     )
 
-    # MICROPHONE
     with mic_col:
 
+        if st.button(
+            "🎙️",
+            key="toggle_microphone",
+            help="Record your voice",
+            use_container_width=True
+        ):
+
+            st.session_state.mic_open = not st.session_state.mic_open
+
+            st.rerun()
+
+    # --------------------------------------
+    # VOICE RECORDER
+    # --------------------------------------
+
+    # IMPORTANT:
+    # Process audio BEFORE creating the text input.
+    # This prevents changing the text input state
+    # after Streamlit has instantiated that widget.
+
+    if st.session_state.mic_open:
+
+        st.caption("🎙️ Record your health question")
+
         audio = st.audio_input(
-            "Microphone",
-            label_visibility="collapsed",
+            "Record your question",
             key=f"chat_mic_{st.session_state.chat_mic_version}"
         )
 
-    # AUTOMATIC VOICE TRANSCRIPTION
-    if audio:
+        if audio:
 
-        with st.spinner("Converting your voice to text..."):
+            with st.spinner("Converting your voice to text..."):
 
-            transcription = transcribe_audio(
-                audio.getvalue(),
-                language
-            )
+                transcription = transcribe_audio(
+                    audio.getvalue(),
+                    language
+                )
 
-        if (
-            transcription
-            and not transcription.startswith("Voice recognition error:")
-            and not transcription.startswith("Groq API key is missing")
-        ):
+            if (
+                transcription
+                and not transcription.startswith("Voice recognition error:")
+                and not transcription.startswith("Groq API key is missing")
+            ):
 
-            st.session_state.chat_text = transcription
+                st.session_state.chat_text = transcription
 
-            st.session_state.chat_mic_version += 1
+                st.session_state.mic_open = False
 
-            st.rerun()
+                st.session_state.chat_mic_version += 1
 
-        else:
+                st.rerun()
 
-            st.error(transcription)
+            else:
 
-            st.session_state.chat_mic_version += 1
+                st.error(transcription)
 
-            st.rerun()
-
+    # --------------------------------------
     # TEXT INPUT
+    # --------------------------------------
+
     with text_col:
 
         question = st.text_input(
@@ -690,14 +692,18 @@ elif page == "AI Health Chat":
             key="chat_text"
         )
 
+    # --------------------------------------
     # SEND BUTTON
+    # --------------------------------------
+
     with send_col:
 
         send_clicked = st.button(
             "➤",
-            use_container_width=True,
+            key="send_chat_message",
             help="Send your question",
-            type="primary"
+            type="primary",
+            use_container_width=True
         )
 
     # --------------------------------------
@@ -711,17 +717,20 @@ elif page == "AI Health Chat":
             language
         )
 
-        st.session_state.chat_text = ""
+        # Clear the message on the NEXT rerun,
+        # before the text input widget is created.
 
+        st.session_state.clear_chat_text = True
+
+        st.session_state.mic_open = False
         st.session_state.spoken_audio = None
-
         st.session_state.spoken_message_index = None
 
         st.rerun()
 
     st.caption(
-        "🎙️ Use the microphone to speak or type your question. "
-        "Your spoken question will appear in the message box."
+        "Use 🎙️ to speak or type your question. "
+        "Your voice will be converted into text before sending."
     )
 
 
