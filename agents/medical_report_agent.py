@@ -26,7 +26,8 @@ def analyze_report(content, language="English", is_image=False):
     if is_image:
         return analyze_image(
             content,
-            instruction + prompt
+            instruction + prompt,
+            language
         )
 
     return generate_response([
