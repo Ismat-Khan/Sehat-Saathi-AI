@@ -3,8 +3,6 @@ import streamlit as st
 from PIL import Image
 from io import BytesIO
 
-from utils.llm_config import get_groq_client
-from utils.language import get_language_instruction
 from tools.report_tools import extract_pdf_text
 
 from agents.medical_report_agent import analyze_report
@@ -12,7 +10,7 @@ from agents.medicine_agent import analyze_medicine_image, analyze_medicine
 from agents.health_assistant_agent import health_chat
 from agents.health_summary_agent import create_summary
 from agents.diet_agent import create_diet_plan
-from agents.safety_agent import check_emergency, safety_notice
+from agents.safety_agent import check_emergency
 from agents.voice_agent import transcribe_audio, speak_response
 
 
@@ -28,162 +26,154 @@ st.set_page_config(
 
 
 # -----------------------------------
-# CUSTOM UI DESIGN
+# THEME-AWARE DESIGN
+# Supports Light, Dark and System themes
 # -----------------------------------
 
 st.markdown("""
 <style>
 
-/* Main page */
+/* Use Streamlit's active theme colors */
+:root {
+    --ssa-bg: var(--background-color, #F4F8F7);
+    --ssa-secondary: var(--secondary-background-color, #E5F3EF);
+    --ssa-text: var(--text-color, #20343A);
+    --ssa-primary: var(--primary-color, #087F70);
+}
+
+/* Main application */
 .stApp {
-    background-color: #F4F8F7;
-    color: #20343A;
+    background-color: var(--ssa-bg) !important;
+    color: var(--ssa-text) !important;
 }
 
-/* Main content typography */
-[data-testid="stAppViewContainer"] .main,
-[data-testid="stAppViewContainer"] .main p,
-[data-testid="stAppViewContainer"] .main li,
-[data-testid="stAppViewContainer"] .main label,
-[data-testid="stAppViewContainer"] .main h1,
-[data-testid="stAppViewContainer"] .main h2,
-[data-testid="stAppViewContainer"] .main h3,
-[data-testid="stAppViewContainer"] .main [data-testid="stMarkdownContainer"] {
-    color: #20343A;
+[data-testid="stAppViewContainer"] {
+    background-color: var(--ssa-bg) !important;
 }
 
+/* Header */
+[data-testid="stHeader"] {
+    background-color: var(--ssa-bg);
+}
+
+/* All ordinary text follows the active theme */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3,
+[data-testid="stMarkdownContainer"] strong,
+[data-testid="stMarkdownContainer"] em {
+    color: var(--ssa-text);
+}
+
+/* Main title */
 .main-title {
-    color: #087F70 !important;
+    color: var(--ssa-primary) !important;
     font-size: 38px;
     font-weight: 800;
 }
 
+/* Subtitle */
 .subtitle {
-    color: #47635F !important;
+    color: var(--ssa-text) !important;
+    opacity: 0.8;
     font-size: 16px;
 }
 
-/* Sidebar */
+/* Sidebar follows the active theme */
 [data-testid="stSidebar"] {
-    background-color: #E4F1ED;
+    background-color: var(--ssa-secondary) !important;
 }
 
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h1,
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h2,
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3,
+/* Sidebar text */
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] *,
 [data-testid="stSidebar"] label,
-[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
-    color: #183C38 !important;
+[data-testid="stSidebar"] [role="radiogroup"] * {
+    color: var(--ssa-text) !important;
 }
 
+/* Sidebar title */
 [data-testid="stSidebar"] h1 {
-    color: #087F70 !important;
+    color: var(--ssa-primary) !important;
     font-weight: 800;
 }
 
-/* Sidebar navigation */
-[data-testid="stSidebar"] [role="radiogroup"] label,
-[data-testid="stSidebar"] [role="radiogroup"] label p,
-[data-testid="stSidebar"] [role="radiogroup"] label span {
-    color: #183C38 !important;
+/* Input fields */
+.stTextInput input,
+.stTextArea textarea,
+.stNumberInput input,
+[data-testid="stChatInput"] textarea {
+    background-color: var(--ssa-secondary) !important;
+    color: var(--ssa-text) !important;
+    border: 1px solid rgba(128, 128, 128, 0.45) !important;
+    border-radius: 8px;
 }
 
-/* Form labels */
+/* Input placeholders */
+.stTextInput input::placeholder,
+.stTextArea textarea::placeholder,
+[data-testid="stChatInput"] textarea::placeholder {
+    color: var(--ssa-text) !important;
+    opacity: 0.6;
+}
+
+/* Select box */
+[data-baseweb="select"] > div {
+    background-color: var(--ssa-secondary) !important;
+    color: var(--ssa-text) !important;
+    border-color: rgba(128, 128, 128, 0.45) !important;
+}
+
+[data-baseweb="select"] * {
+    color: var(--ssa-text) !important;
+}
+
+/* Input labels */
 .stTextInput label,
 .stTextArea label,
 .stSelectbox label,
 .stNumberInput label,
-.stFileUploader label,
-.stAudioInput label {
-    color: #183C38 !important;
+.stFileUploader label {
+    color: var(--ssa-text) !important;
     font-weight: 600;
 }
 
-/* Text fields */
-.stTextInput input,
-.stTextArea textarea,
-.stNumberInput input {
-    background-color: #FFFFFF !important;
-    color: #20343A !important;
-    border: 1px solid #B8D1CA !important;
-    border-radius: 8px;
-}
-
-.stTextInput input::placeholder,
-.stTextArea textarea::placeholder {
-    color: #718783 !important;
-}
-
-/* Select boxes */
-.stSelectbox [data-baseweb="select"] > div {
-    background-color: #FFFFFF !important;
-    color: #20343A !important;
-    border-color: #B8D1CA !important;
-}
-
-/* Buttons */
+/* Buttons: preserve Streamlit's theme-aware colors */
 div.stButton > button {
-    background-color: #087F70 !important;
-    color: #FFFFFF !important;
-    border: 1px solid #087F70 !important;
     border-radius: 10px;
-    padding: 10px 20px;
     font-weight: 600;
 }
 
-div.stButton > button:hover {
-    background-color: #06675C !important;
-    border-color: #06675C !important;
-    color: #FFFFFF !important;
-}
-
-/* Information, success and warning panels */
-[data-testid="stAlert"] {
-    border-radius: 12px;
-}
-
-[data-testid="stAlert"] p,
-[data-testid="stAlert"] div {
-    color: #20343A !important;
-}
-
-/* Uploaded file area */
+/* Upload area */
 [data-testid="stFileUploader"] {
-    background-color: #FFFFFF;
-    border: 1px dashed #91B9AE;
+    border: 1px dashed var(--ssa-primary);
     border-radius: 12px;
     padding: 8px;
 }
 
-[data-testid="stFileUploader"] * {
-    color: #20343A;
-}
-
-/* Chat bubbles */
+/* Chat messages: let Streamlit choose theme colors */
 [data-testid="stChatMessage"] {
-    background-color: #FFFFFF;
-    border: 1px solid #D8E6E1;
     border-radius: 14px;
+    border: 1px solid rgba(128, 128, 128, 0.25);
 }
 
-/* Chat input */
-[data-testid="stChatInput"] textarea {
-    background-color: #FFFFFF !important;
-    color: #20343A !important;
+/* Alerts: preserve native light/dark contrast */
+[data-testid="stAlert"] {
+    border-radius: 12px;
 }
 
-/* Dividers and links */
-hr {
-    border-color: #B8CEC7;
-}
-
+/* Links */
 a {
-    color: #087F70 !important;
+    color: var(--ssa-primary) !important;
 }
 
-/* Hide Streamlit's default footer */
+/* Dividers */
+hr {
+    border-color: rgba(128, 128, 128, 0.3);
+}
+
+/* Footer */
 footer {
     visibility: hidden;
 }
@@ -210,6 +200,7 @@ if "language" not in st.session_state:
 with st.sidebar:
 
     st.markdown("# 💚 Sehat Saathi AI")
+
     st.caption("Your Intelligent Healthcare Companion")
 
     language = st.selectbox(
@@ -271,9 +262,7 @@ if page == "Home":
         unsafe_allow_html=True
     )
 
-    st.markdown(
-        f"### {welcome}"
-    )
+    st.markdown(f"### {welcome}")
 
     st.markdown(
         f'<div class="subtitle">{subtitle}</div>',
@@ -287,6 +276,7 @@ if page == "Home":
     col1, col2 = st.columns(2)
 
     with col1:
+
         st.info(
             "🩻 **Medical Reports**\n\n"
             "Upload your medical reports or X-rays."
@@ -303,6 +293,7 @@ if page == "Home":
         )
 
     with col2:
+
         st.success(
             "💬 **AI Health Chat**\n\n"
             "Ask healthcare-related questions."
@@ -357,6 +348,7 @@ elif page == "Medical Report Analysis":
                 extracted_text = extract_pdf_text(file_bytes)
 
             st.subheader("Extracted Report Text")
+
             st.text_area(
                 "Report content",
                 extracted_text,
@@ -431,6 +423,12 @@ elif page == "Medical Report Analysis":
                 st.subheader("Health Summary")
                 st.write(summary)
 
+            else:
+
+                st.warning(
+                    "Please analyze a report or image first."
+                )
+
 
 # -----------------------------------
 # MEDICINE SCANNER
@@ -463,44 +461,48 @@ elif page == "Medicine Scanner":
 
     if st.button("Identify Medicine"):
 
-        with st.spinner("Checking medicine information..."):
+        if medicine_image or medicine_name.strip():
 
-            if medicine_image:
+            with st.spinner("Checking medicine information..."):
 
-                image = Image.open(
-                    BytesIO(medicine_image.getvalue())
-                ).convert("RGB")
+                if medicine_image:
 
-                buffer = BytesIO()
+                    image = Image.open(
+                        BytesIO(medicine_image.getvalue())
+                    ).convert("RGB")
 
-                image.save(
-                    buffer,
-                    format="JPEG"
-                )
+                    buffer = BytesIO()
 
-                result = analyze_medicine_image(
-                    buffer.getvalue(),
-                    language
-                )
+                    image.save(
+                        buffer,
+                        format="JPEG"
+                    )
 
-            elif medicine_name.strip():
+                    result = analyze_medicine_image(
+                        buffer.getvalue(),
+                        language
+                    )
 
-                result = analyze_medicine(
-                    medicine_name,
-                    language
-                )
+                else:
 
-            else:
+                    result = analyze_medicine(
+                        medicine_name,
+                        language
+                    )
 
-                result = "Please upload a medicine image or enter its name."
+            st.subheader("Medicine Information")
+            st.write(result)
 
-        st.subheader("Medicine Information")
-        st.write(result)
+            st.warning(
+                "Always verify medicine information with a pharmacist. "
+                "Do not change medication based on AI output."
+            )
 
-        st.warning(
-            "Always verify the medicine with a pharmacist. "
-            "Do not change your medication based on AI output."
-        )
+        else:
+
+            st.warning(
+                "Please upload a medicine image or enter its name."
+            )
 
 
 # -----------------------------------
@@ -520,6 +522,7 @@ elif page == "AI Health Chat":
     for message in st.session_state.messages:
 
         with st.chat_message(message["role"]):
+
             st.write(message["content"])
 
     # Text input
@@ -551,12 +554,15 @@ elif page == "AI Health Chat":
         if check_emergency(question):
 
             if language == "Urdu":
+
                 st.error(
                     "ممکنہ طبی ایمرجنسی۔ "
                     "فوراً اپنے مقامی ایمرجنسی نمبر پر رابطہ کریں "
                     "یا قریبی ایمرجنسی ڈیپارٹمنٹ جائیں۔"
                 )
+
             else:
+
                 st.error(
                     "Possible medical emergency. Contact "
                     "your local emergency services or go to "
@@ -601,11 +607,14 @@ elif page == "AI Health Chat":
                     )
 
                 if audio_bytes:
+
                     st.audio(
                         audio_bytes,
                         format="audio/mp3"
                     )
+
                 else:
+
                     st.error("Voice generation failed.")
 
 
@@ -676,9 +685,9 @@ elif page == "Diet & Nutrition":
         st.write(result)
 
         st.warning(
-            "This is general nutrition guidance, not a "
-            "medical prescription. Consult a qualified "
-            "dietitian for medical dietary requirements."
+            "This is general nutrition guidance, not a medical "
+            "prescription. Consult a qualified dietitian for "
+            "medical dietary requirements."
         )
 
 
@@ -716,7 +725,9 @@ elif page == "Health Summary":
 
         else:
 
-            st.warning("Please enter your report information.")
+            st.warning(
+                "Please enter your report information."
+            )
 
 
 # -----------------------------------
