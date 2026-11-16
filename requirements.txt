@@ -1,0 +1,7 @@
+streamlit
+groq
+Pillow
+PyMuPDF
+pandas
+requests
+python-dotenv
