@@ -4,6 +4,7 @@ from PIL import Image
 from io import BytesIO
 
 from tools.report_tools import extract_pdf_text
+
 from agents.medical_report_agent import analyze_report
 from agents.medicine_agent import analyze_medicine, analyze_medicine_image
 from agents.health_assistant_agent import health_chat
@@ -25,30 +26,21 @@ st.set_page_config(
 
 
 # ==========================================
-# AUTOMATIC LIGHT / DARK THEME CSS
+# AUTOMATIC LIGHT / DARK THEME
 # ==========================================
 
 st.markdown("""
 <style>
-
-/* Main application: follows selected Streamlit theme */
 .stApp {
     background-color: var(--background-color);
     color: var(--text-color);
 }
 
-/* Main content */
 [data-testid="stAppViewContainer"] {
     background-color: var(--background-color);
     color: var(--text-color);
 }
 
-[data-testid="stAppViewContainer"] .main {
-    background-color: var(--background-color);
-    color: var(--text-color);
-}
-
-/* Headings and normal text */
 [data-testid="stAppViewContainer"] .main h1,
 [data-testid="stAppViewContainer"] .main h2,
 [data-testid="stAppViewContainer"] .main h3,
@@ -58,14 +50,12 @@ st.markdown("""
     color: var(--text-color);
 }
 
-/* Main title */
 .main-title {
     color: var(--primary-color) !important;
     font-size: 38px;
     font-weight: 800;
 }
 
-/* Subtitle */
 .subtitle {
     color: var(--text-color) !important;
     opacity: 0.8;
@@ -77,7 +67,6 @@ st.markdown("""
     background-color: var(--secondary-background-color);
 }
 
-/* Sidebar text */
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] label,
@@ -87,20 +76,12 @@ st.markdown("""
     color: var(--text-color) !important;
 }
 
-/* Sidebar title */
 [data-testid="stSidebar"] h1 {
     color: var(--primary-color) !important;
     font-weight: 800;
 }
 
-/* Sidebar navigation */
-[data-testid="stSidebar"] [role="radiogroup"] label,
-[data-testid="stSidebar"] [role="radiogroup"] label p,
-[data-testid="stSidebar"] [role="radiogroup"] label span {
-    color: var(--text-color) !important;
-}
-
-/* Input labels */
+/* Inputs */
 .stTextInput label,
 .stTextArea label,
 .stSelectbox label,
@@ -110,7 +91,6 @@ st.markdown("""
     font-weight: 600;
 }
 
-/* Text input fields */
 .stTextInput input,
 .stTextArea textarea,
 .stNumberInput input,
@@ -121,7 +101,6 @@ st.markdown("""
     border-radius: 8px;
 }
 
-/* Input placeholders */
 .stTextInput input::placeholder,
 .stTextArea textarea::placeholder,
 [data-testid="stChatInput"] textarea::placeholder {
@@ -129,25 +108,14 @@ st.markdown("""
     opacity: 0.6;
 }
 
-/* Dropdown fields */
+/* Dropdown */
 .stSelectbox [data-baseweb="select"] > div {
     background-color: var(--secondary-background-color) !important;
     color: var(--text-color) !important;
     border-color: var(--primary-color) !important;
 }
 
-/* Dropdown menu */
-[data-baseweb="popover"],
-[data-baseweb="menu"] {
-    background-color: var(--secondary-background-color) !important;
-    color: var(--text-color) !important;
-}
-
-[data-baseweb="menu"] li {
-    color: var(--text-color) !important;
-}
-
-/* Buttons: retain Streamlit theme's accessible colors */
+/* Buttons */
 div.stButton > button {
     border-radius: 10px;
     font-weight: 600;
@@ -169,12 +137,6 @@ div.stButton > button {
     border-radius: 14px;
 }
 
-/* Chat message text */
-[data-testid="stChatMessage"] p,
-[data-testid="stChatMessage"] li {
-    color: var(--text-color);
-}
-
 /* Alerts */
 [data-testid="stAlert"] {
     border-radius: 12px;
@@ -191,11 +153,9 @@ a {
     color: var(--primary-color) !important;
 }
 
-/* Footer */
 footer {
     visibility: hidden;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -204,14 +164,79 @@ footer {
 # SESSION STATE
 # ==========================================
 
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+defaults = {
+    "messages": [],
+    "language": "English",
+    "report_result": "",
+    "pending_voice_question": "",
+    "voice_widget_version": 0,
+    "spoken_audio": None
+}
 
-if "language" not in st.session_state:
-    st.session_state.language = "English"
+for key, value in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
 
-if "report_result" not in st.session_state:
-    st.session_state.report_result = ""
+
+# ==========================================
+# CHAT QUESTION HANDLER
+# ==========================================
+
+def submit_chat_question(question, language):
+
+    question = question.strip()
+
+    if not question:
+        return
+
+    if check_emergency(question):
+
+        if language == "Urdu":
+            emergency_message = (
+                "ممکنہ طبی ایمرجنسی۔ فوراً مقامی ایمرجنسی سروس "
+                "سے رابطہ کریں یا قریبی ہسپتال کے ایمرجنسی ڈیپارٹمنٹ جائیں۔"
+            )
+        else:
+            emergency_message = (
+                "Possible medical emergency. Contact local emergency "
+                "services or go to the nearest emergency department "
+                "immediately. Do not wait for an AI response."
+            )
+
+        st.session_state.messages.append({
+            "role": "user",
+            "content": question
+        })
+
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": emergency_message
+        })
+
+        st.session_state.spoken_audio = None
+        return
+
+    previous_messages = st.session_state.messages.copy()
+
+    st.session_state.messages.append({
+        "role": "user",
+        "content": question
+    })
+
+    with st.spinner("Sehat Saathi AI is preparing your answer..."):
+
+        answer = health_chat(
+            question,
+            previous_messages,
+            language
+        )
+
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": answer
+    })
+
+    st.session_state.spoken_audio = None
 
 
 # ==========================================
@@ -221,7 +246,6 @@ if "report_result" not in st.session_state:
 with st.sidebar:
 
     st.markdown("# 💚 Sehat Saathi AI")
-
     st.caption("Your Intelligent Healthcare Companion")
 
     language = st.selectbox(
@@ -251,7 +275,10 @@ with st.sidebar:
     st.caption("Powered by Groq AI")
 
     if st.button("Clear Chat History", use_container_width=True):
+
         st.session_state.messages = []
+        st.session_state.pending_voice_question = ""
+        st.session_state.spoken_audio = None
         st.rerun()
 
 
@@ -271,52 +298,42 @@ if page == "Home":
         st.write("اپنی صحت کے بارے میں آسان معلومات حاصل کریں۔")
     else:
         st.subheader("Your Intelligent Healthcare Companion")
-        st.write(
-            "Understand your health with AI-powered assistance."
-        )
+        st.write("Understand your health with AI-powered assistance.")
 
     st.divider()
 
     col1, col2 = st.columns(2)
 
     with col1:
-
         st.info(
             "**🩻 Medical Report Analysis**\n\n"
-            "Upload medical reports and images "
-            "to receive easy explanations."
+            "Upload medical reports and images for explanations."
         )
 
         st.success(
             "**💊 Medicine Scanner**\n\n"
-            "Upload medicine packaging to examine "
-            "visible medicine information."
+            "Read visible information on medicine packaging."
         )
 
         st.info(
             "**🥗 Diet & Nutrition**\n\n"
-            "Get general nutrition guidance "
-            "with Pakistani food options."
+            "Get general nutrition guidance with Pakistani food options."
         )
 
     with col2:
-
         st.success(
             "**💬 AI Health Chat**\n\n"
-            "Ask general healthcare questions "
-            "in English or Urdu."
+            "Ask healthcare questions in English or Urdu."
         )
 
         st.info(
             "**📋 Health Summary**\n\n"
-            "Turn medical report information "
-            "into an easy-to-understand summary."
+            "Create easy-to-understand health summaries."
         )
 
         st.success(
             "**🎙️ Voice Assistant**\n\n"
-            "Speak your questions and listen "
-            "to AI-generated responses."
+            "Ask questions by voice and listen to responses."
         )
 
     st.divider()
@@ -336,9 +353,7 @@ elif page == "Medical Report Analysis":
 
     st.title("🩻 Medical Report Analysis")
 
-    st.write(
-        "Upload a medical report, X-ray or medical image."
-    )
+    st.write("Upload a medical report, X-ray or medical image.")
 
     uploaded_file = st.file_uploader(
         "Upload your medical file",
@@ -355,7 +370,6 @@ elif page == "Medical Report Analysis":
         if is_pdf:
 
             with st.spinner("Reading your medical report..."):
-
                 extracted_text = extract_pdf_text(file_bytes)
 
             st.subheader("Extracted Report Text")
@@ -370,16 +384,13 @@ elif page == "Medical Report Analysis":
 
                 with st.spinner("Analyzing your report..."):
 
-                    result = analyze_report(
+                    st.session_state.report_result = analyze_report(
                         extracted_text,
                         language,
                         is_image=False
                     )
 
-                    st.session_state.report_result = result
-
             if st.session_state.report_result:
-
                 st.subheader("Medical Report Explanation")
                 st.write(st.session_state.report_result)
 
@@ -407,16 +418,13 @@ elif page == "Medical Report Analysis":
                         quality=85
                     )
 
-                    result = analyze_report(
+                    st.session_state.report_result = analyze_report(
                         buffer.getvalue(),
                         language,
                         is_image=True
                     )
 
-                    st.session_state.report_result = result
-
             if st.session_state.report_result:
-
                 st.subheader("Medical Image Explanation")
                 st.write(st.session_state.report_result)
 
@@ -512,19 +520,17 @@ elif page == "Medicine Scanner":
         else:
 
             st.warning(
-                "Please upload a medicine picture "
-                "or enter a medicine name."
+                "Please upload a medicine picture or enter a medicine name."
             )
 
     st.warning(
         "AI medicine identification can be incorrect. "
-        "Always verify medicine details with a pharmacist. "
-        "Do not change your medication based on AI output."
+        "Always verify medicine details with a pharmacist."
     )
 
 
 # ==========================================
-# AI HEALTH CHAT
+# AI HEALTH CHAT AND VOICE ASSISTANT
 # ==========================================
 
 elif page == "AI Health Chat":
@@ -532,103 +538,139 @@ elif page == "AI Health Chat":
     st.title("💬 Sehat Saathi AI Health Assistant")
 
     st.write(
-        "Ask general healthcare questions in English or Urdu."
+        "Ask your health questions by typing or recording your voice."
     )
 
-    # Display conversation history
+    # --------------------------------------
+    # SHOW CHAT HISTORY
+    # --------------------------------------
 
     for message in st.session_state.messages:
 
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-    # Voice input
+    st.divider()
+
+    # --------------------------------------
+    # VOICE QUESTION SECTION
+    # --------------------------------------
+
+    st.subheader("🎙️ Ask using your voice")
+
+    st.write(
+        "Record your question, review the converted text, "
+        "and then send it to Sehat Saathi AI."
+    )
 
     audio = st.audio_input(
-        "🎙️ Record your health question"
+        "Record your health question",
+        key=f"voice_recording_{st.session_state.voice_widget_version}"
     )
 
-    if audio and st.button("Process Voice Message"):
+    if audio:
 
-        with st.spinner("Converting your voice to text..."):
+        st.audio(
+            audio,
+            format="audio/wav"
+        )
 
-            transcribed_text = transcribe_audio(
-                audio.getvalue(),
-                language
-            )
-
-        if transcribed_text and not transcribed_text.startswith(
-            "Voice recognition error:"
-        ) and not transcribed_text.startswith(
-            "Groq API key is missing"
+        if st.button(
+            "Convert Voice to Text",
+            use_container_width=True
         ):
 
-            st.session_state.voice_question = transcribed_text
+            with st.spinner("Listening to your recording..."):
 
-        else:
-
-            st.error(transcribed_text)
-
-    # Text input
-
-    question = st.chat_input(
-        "Ask your health question..."
-    )
-
-    # Use transcribed voice if available
-
-    voice_question = st.session_state.pop(
-        "voice_question",
-        None
-    )
-
-    if voice_question:
-        question = voice_question
-        st.write("Recognized speech:", question)
-
-    if question:
-
-        if check_emergency(question):
-
-            if language == "Urdu":
-
-                st.error(
-                    "ممکنہ طبی ایمرجنسی۔ "
-                    "فوراً مقامی ایمرجنسی سروس سے رابطہ کریں "
-                    "یا قریبی ہسپتال جائیں۔"
-                )
-
-            else:
-
-                st.error(
-                    "Possible medical emergency. "
-                    "Contact local emergency services "
-                    "or go to the nearest emergency department immediately."
-                )
-
-        else:
-
-            st.session_state.messages.append({
-                "role": "user",
-                "content": question
-            })
-
-            with st.spinner("Sehat Saathi AI is thinking..."):
-
-                result = health_chat(
-                    question,
-                    st.session_state.messages[:-1],
+                transcription = transcribe_audio(
+                    audio.getvalue(),
                     language
                 )
 
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": result
-            })
+            if (
+                transcription
+                and not transcription.startswith("Voice recognition error:")
+                and not transcription.startswith("Groq API key is missing")
+            ):
 
-            st.rerun()
+                st.session_state.pending_voice_question = transcription
 
-    # Speak the last assistant response
+            else:
+
+                st.error(transcription)
+
+    # --------------------------------------
+    # REVIEW TRANSCRIPTION
+    # --------------------------------------
+
+    if st.session_state.pending_voice_question:
+
+        st.success("Your voice has been converted into text.")
+
+        edited_question = st.text_area(
+            "Review or edit your question before sending:",
+            value=st.session_state.pending_voice_question,
+            key="voice_transcription_review",
+            height=100
+        )
+
+        col_send, col_cancel = st.columns(2)
+
+        with col_send:
+
+            if st.button(
+                "Send Question to AI",
+                use_container_width=True
+            ):
+
+                if edited_question.strip():
+
+                    st.session_state.pending_voice_question = ""
+
+                    submit_chat_question(
+                        edited_question,
+                        language
+                    )
+
+                    st.session_state.voice_widget_version += 1
+
+                    st.rerun()
+
+        with col_cancel:
+
+            if st.button(
+                "Cancel Recording",
+                use_container_width=True
+            ):
+
+                st.session_state.pending_voice_question = ""
+                st.session_state.voice_widget_version += 1
+                st.rerun()
+
+    st.divider()
+
+    # --------------------------------------
+    # TEXT QUESTION SECTION
+    # --------------------------------------
+
+    st.subheader("⌨️ Or type your question")
+
+    typed_question = st.chat_input(
+        "Write your health question here..."
+    )
+
+    if typed_question:
+
+        submit_chat_question(
+            typed_question,
+            language
+        )
+
+        st.rerun()
+
+    # --------------------------------------
+    # LISTEN TO LAST AI RESPONSE
+    # --------------------------------------
 
     if st.session_state.messages:
 
@@ -636,25 +678,43 @@ elif page == "AI Health Chat":
 
         if last_message["role"] == "assistant":
 
-            if st.button("🔊 Speak Last Response"):
+            st.divider()
 
-                with st.spinner("Generating speech..."):
+            st.subheader("🔊 Listen to AI Response")
 
-                    audio_bytes = speak_response(
+            st.write(
+                "Listen to the latest answer in your selected language."
+            )
+
+            if st.button(
+                "Generate Voice Response",
+                use_container_width=True
+            ):
+
+                with st.spinner("Preparing natural speech..."):
+
+                    st.session_state.spoken_audio = speak_response(
                         last_message["content"],
                         language
                     )
 
-                if audio_bytes:
+            if st.session_state.spoken_audio:
 
-                    st.audio(
-                        audio_bytes,
-                        format="audio/mp3"
-                    )
+                st.audio(
+                    st.session_state.spoken_audio,
+                    format="audio/mp3"
+                )
 
-                else:
+            elif st.session_state.spoken_audio is None:
 
-                    st.error("Voice generation failed.")
+                st.caption(
+                    "Select Generate Voice Response to listen to the answer."
+                )
+
+    st.caption(
+        "If recording fails, allow microphone access in your browser "
+        "and try again. You can always type your question instead."
+    )
 
 
 # ==========================================
@@ -666,8 +726,7 @@ elif page == "Diet & Nutrition":
     st.title("🥗 AI Diet & Nutrition Assistant")
 
     st.write(
-        "Get general nutrition guidance "
-        "with practical Pakistani food options."
+        "Get general nutrition guidance with practical Pakistani food options."
     )
 
     age = st.number_input(
@@ -725,9 +784,8 @@ elif page == "Diet & Nutrition":
         st.write(result)
 
         st.warning(
-            "This is general nutrition guidance, not a medical "
-            "prescription. Consult a qualified dietitian "
-            "for medical dietary requirements."
+            "This is general nutrition guidance, not a medical prescription. "
+            "Consult a qualified dietitian for medical dietary requirements."
         )
 
 
