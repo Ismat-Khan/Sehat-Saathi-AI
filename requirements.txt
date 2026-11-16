@@ -1,7 +1,7 @@
-streamlit>=1.40.0
+
+streamlit>=1.52.0
 groq>=0.13.0
 Pillow
 PyMuPDF
 requests
 gTTS
-
