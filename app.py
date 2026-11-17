@@ -27,7 +27,7 @@ st.set_page_config(
 
 
 # ==========================================
-# RESPONSIVE DESIGN - LIGHT AND DARK MODE
+# RESPONSIVE CSS - LIGHT AND DARK MODE
 # ==========================================
 
 st.markdown("""
@@ -45,25 +45,29 @@ st.markdown("""
     color: var(--text-color);
 }
 
-[data-testid="stAppViewContainer"] .main h1,
-[data-testid="stAppViewContainer"] .main h2,
-[data-testid="stAppViewContainer"] .main h3,
-[data-testid="stAppViewContainer"] .main p,
-[data-testid="stAppViewContainer"] .main li,
-[data-testid="stAppViewContainer"] .main label {
-    color: var(--text-color);
+[data-testid="stMainBlockContainer"] {
+    max-width: 100%;
 }
+
+/* MAIN HEADINGS */
 
 .main-title {
     color: var(--primary-color) !important;
-    font-size: 38px;
+    font-size: 36px;
     font-weight: 800;
+    line-height: 1.3;
 }
 
 /* SIDEBAR */
 
 [data-testid="stSidebar"] {
-    background-color: var(--secondary-background-color);
+    background-color: var(--secondary-background-color) !important;
+    z-index: 1001 !important;
+}
+
+[data-testid="stSidebar"] > div,
+[data-testid="stSidebarContent"] {
+    background-color: var(--secondary-background-color) !important;
 }
 
 [data-testid="stSidebar"] p,
@@ -80,7 +84,20 @@ st.markdown("""
     font-weight: 800;
 }
 
-/* INPUTS */
+[data-testid="stSidebar"] [data-testid="stRadio"] {
+    width: 100%;
+}
+
+[data-testid="stSidebar"] [data-testid="stRadio"] label {
+    display: flex !important;
+    align-items: center !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    line-height: 1.4 !important;
+    padding: 7px 4px !important;
+}
+
+/* INPUT FIELDS */
 
 .stTextInput input,
 .stTextArea textarea,
@@ -92,18 +109,11 @@ st.markdown("""
     font-size: 16px !important;
 }
 
-.stTextInput input::placeholder,
-.stTextArea textarea::placeholder {
-    color: var(--text-color) !important;
-    opacity: 0.65;
-}
-
 /* SELECT BOX */
 
 .stSelectbox [data-baseweb="select"] > div {
     background-color: var(--secondary-background-color) !important;
     color: var(--text-color) !important;
-    border-color: var(--primary-color) !important;
 }
 
 /* BUTTONS */
@@ -111,7 +121,7 @@ st.markdown("""
 div.stButton > button {
     border-radius: 10px;
     font-weight: 600;
-    min-height: 42px;
+    min-height: 44px;
     transition: all 0.2s ease;
 }
 
@@ -124,7 +134,7 @@ div.stButton > button {
     padding: 10px;
 }
 
-/* CHAT MESSAGES */
+/* CHAT */
 
 [data-testid="stChatMessage"] {
     background-color: var(--secondary-background-color);
@@ -134,13 +144,11 @@ div.stButton > button {
     padding: 12px;
 }
 
-/* CHAT INPUT */
-
 [data-testid="stChatInput"] {
     width: 100%;
 }
 
-/* IMAGES */
+/* IMAGES AND AUDIO */
 
 [data-testid="stImage"] img {
     max-width: 100%;
@@ -149,13 +157,15 @@ div.stButton > button {
     border-radius: 10px;
 }
 
-/* ALERTS */
+audio {
+    max-width: 100%;
+}
+
+/* ALERTS AND DIVIDERS */
 
 [data-testid="stAlert"] {
     border-radius: 12px;
 }
-
-/* DIVIDERS */
 
 hr {
     border-color: var(--text-color);
@@ -168,13 +178,7 @@ a {
     color: var(--primary-color) !important;
 }
 
-/* AUDIO PLAYER */
-
-audio {
-    max-width: 100%;
-}
-
-/* HIDE FOOTER */
+/* FOOTER */
 
 footer {
     visibility: hidden;
@@ -182,17 +186,15 @@ footer {
 
 
 /* ==========================================
-   TABLET AND MOBILE RESPONSIVENESS
+   TABLET AND MOBILE
    ========================================== */
 
 @media screen and (max-width: 768px) {
 
-    /* MAIN CONTENT AREA */
+    /* MAIN CONTENT */
 
     [data-testid="stMainBlockContainer"] {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        padding-top: 1rem !important;
+        padding: 1rem !important;
         max-width: 100% !important;
     }
 
@@ -223,24 +225,11 @@ footer {
         line-height: 1.6;
     }
 
-    /* STACK COLUMNS */
-
-    [data-testid="stHorizontalBlock"] {
-        flex-wrap: wrap !important;
-        gap: 0.7rem !important;
-    }
-
-    [data-testid="column"] {
-        min-width: 100% !important;
-        width: 100% !important;
-        flex: 1 1 100% !important;
-    }
-
     /* BUTTONS */
 
     div.stButton > button {
         width: 100% !important;
-        min-height: 44px;
+        min-height: 46px;
         font-size: 15px !important;
     }
 
@@ -253,27 +242,23 @@ footer {
         min-height: 44px;
     }
 
-    /* FILE UPLOADER */
-
-    [data-testid="stFileUploader"] {
-        width: 100% !important;
-        padding: 8px !important;
-    }
-
     /* SIDEBAR */
 
     [data-testid="stSidebar"] {
-        min-width: 0 !important;
-        max-width: 85vw !important;
+        background-color: var(--secondary-background-color) !important;
+    }
+
+    [data-testid="stSidebar"] > div,
+    [data-testid="stSidebarContent"] {
+        background-color: var(--secondary-background-color) !important;
     }
 
     [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        gap: 0.5rem !important;
+        gap: 0.6rem !important;
     }
 
     [data-testid="stSidebar"] h2 {
         font-size: 22px !important;
-        margin-bottom: 2px !important;
     }
 
     [data-testid="stSidebar"] p,
@@ -282,39 +267,18 @@ footer {
     }
 
     [data-testid="stSidebar"] [data-testid="stRadio"] label {
-        padding-top: 5px !important;
-        padding-bottom: 5px !important;
+        padding: 8px 4px !important;
+        line-height: 1.5 !important;
     }
 
-    /* CHAT MESSAGES */
+    /* CHAT */
 
     [data-testid="stChatMessage"] {
         padding: 9px !important;
-        border-radius: 12px !important;
     }
-
-    /* CHAT INPUT */
-
-    [data-testid="stChatInput"] {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-    }
-
-    /* AUDIO */
 
     audio {
         width: 100% !important;
-        max-width: 100% !important;
-    }
-
-    /* PREVENT HORIZONTAL SCROLLING */
-
-    .stApp,
-    [data-testid="stAppViewContainer"],
-    [data-testid="stMain"],
-    [data-testid="stMainBlockContainer"] {
-        max-width: 100% !important;
-        overflow-x: hidden !important;
     }
 
 }
@@ -327,8 +291,7 @@ footer {
 @media screen and (max-width: 480px) {
 
     [data-testid="stMainBlockContainer"] {
-        padding-left: 0.75rem !important;
-        padding-right: 0.75rem !important;
+        padding: 0.75rem !important;
     }
 
     .main-title {
@@ -341,14 +304,6 @@ footer {
 
     h2 {
         font-size: 20px !important;
-    }
-
-    [data-testid="stSidebar"] {
-        max-width: 88vw !important;
-    }
-
-    [data-testid="stChatMessage"] {
-        padding: 8px !important;
     }
 
 }
@@ -366,13 +321,21 @@ defaults = {
     "language": "English",
     "report_result": "",
     "spoken_audio": None,
-    "spoken_message_index": None
+    "spoken_message_index": None,
+    "page_navigation": "Home"
 }
 
 for key, value in defaults.items():
-
     if key not in st.session_state:
         st.session_state[key] = value
+
+
+# ==========================================
+# NAVIGATION FUNCTION
+# ==========================================
+
+def go_to_page(target):
+    st.session_state.page_navigation = target
 
 
 # ==========================================
@@ -386,18 +349,14 @@ def submit_chat_question(question, language):
     if not question:
         return
 
-    # Basic emergency keyword check
     if check_emergency(question):
 
         if language == "Urdu":
-
             emergency_message = (
                 "ممکنہ طبی ایمرجنسی۔ فوراً مقامی ایمرجنسی سروس "
                 "سے رابطہ کریں یا قریبی ہسپتال کے ایمرجنسی ڈیپارٹمنٹ جائیں۔"
             )
-
         else:
-
             emergency_message = (
                 "Possible medical emergency. Contact local emergency "
                 "services or go to the nearest emergency department "
@@ -438,7 +397,7 @@ def submit_chat_question(question, language):
 
 
 # ==========================================
-# SIDEBAR — RESPONSIVE NAVIGATION
+# SIDEBAR - MOBILE FRIENDLY NAVIGATION
 # ==========================================
 
 with st.sidebar:
@@ -474,6 +433,7 @@ with st.sidebar:
             "Diet & Nutrition",
             "Health Summary"
         ],
+        key="page_navigation",
         label_visibility="collapsed"
     )
 
@@ -494,7 +454,7 @@ with st.sidebar:
 
 
 # ==========================================
-# HOME PAGE
+# HOME PAGE - CLICKABLE FEATURE CARDS
 # ==========================================
 
 if page == "Home":
@@ -504,66 +464,111 @@ if page == "Home":
         unsafe_allow_html=True
     )
 
-    if language == "Urdu":
+    st.subheader("Your Intelligent Healthcare Companion")
 
-        st.subheader("آپ کا صحت کا ساتھی")
-
-        st.write(
-            "اپنی صحت کے بارے میں آسان معلومات حاصل کریں۔"
-        )
-
-    else:
-
-        st.subheader("Your Intelligent Healthcare Companion")
-
-        st.write(
-            "Understand your health with AI-powered assistance."
-        )
+    st.write(
+        "Understand your health with AI-powered assistance."
+    )
 
     st.divider()
 
-    col1, col2 = st.columns(2)
+    st.markdown("### Explore Our Features")
 
-    with col1:
+    # MEDICAL REPORT ANALYSIS
 
-        st.info(
-            "**🩻 Medical Report Analysis**\n\n"
+    with st.container(border=True):
+
+        st.markdown("### 🩻 Medical Report Analysis")
+
+        st.write(
             "Upload medical reports and images for explanations."
         )
 
-        st.success(
-            "**💊 Medicine Scanner**\n\n"
+        st.button(
+            "Open Medical Report Analysis →",
+            key="home_report",
+            use_container_width=True,
+            on_click=go_to_page,
+            args=("Medical Report Analysis",)
+        )
+
+    # MEDICINE SCANNER
+
+    with st.container(border=True):
+
+        st.markdown("### 💊 Medicine Scanner")
+
+        st.write(
             "Read visible information on medicine packaging."
         )
 
-        st.info(
-            "**🥗 Diet & Nutrition**\n\n"
+        st.button(
+            "Open Medicine Scanner →",
+            key="home_medicine",
+            use_container_width=True,
+            on_click=go_to_page,
+            args=("Medicine Scanner",)
+        )
+
+    # AI HEALTH CHAT
+
+    with st.container(border=True):
+
+        st.markdown("### 💬 AI Health Chat")
+
+        st.write(
+            "Ask health questions in English or Urdu using text or voice."
+        )
+
+        st.button(
+            "Open AI Health Chat →",
+            key="home_chat",
+            use_container_width=True,
+            on_click=go_to_page,
+            args=("AI Health Chat",)
+        )
+
+    # DIET AND NUTRITION
+
+    with st.container(border=True):
+
+        st.markdown("### 🥗 Diet & Nutrition")
+
+        st.write(
             "Get general nutrition guidance with Pakistani food options."
         )
 
-    with col2:
-
-        st.success(
-            "**💬 AI Health Chat**\n\n"
-            "Ask healthcare questions in English or Urdu."
+        st.button(
+            "Open Diet & Nutrition →",
+            key="home_diet",
+            use_container_width=True,
+            on_click=go_to_page,
+            args=("Diet & Nutrition",)
         )
 
-        st.info(
-            "**📋 Health Summary**\n\n"
-            "Create easy-to-understand health summaries."
+    # HEALTH SUMMARY
+
+    with st.container(border=True):
+
+        st.markdown("### 📋 Health Summary")
+
+        st.write(
+            "Generate easy-to-understand health summaries."
         )
 
-        st.success(
-            "**🎙️ Voice Assistant**\n\n"
-            "Ask questions by voice and listen to responses."
+        st.button(
+            "Open Health Summary →",
+            key="home_summary",
+            use_container_width=True,
+            on_click=go_to_page,
+            args=("Health Summary",)
         )
 
     st.divider()
 
     st.warning(
         "Sehat Saathi AI provides educational health information. "
-        "It does not replace doctors, radiologists, pharmacists "
-        "or emergency medical services."
+        "It does not replace doctors or emergency medical services."
     )
 
 
@@ -763,7 +768,7 @@ elif page == "Medicine Scanner":
 
 
 # ==========================================
-# AI HEALTH CHAT — BUILT-IN MICROPHONE
+# AI HEALTH CHAT
 # ==========================================
 
 elif page == "AI Health Chat":
@@ -782,7 +787,7 @@ elif page == "AI Health Chat":
 
             st.write(message["content"])
 
-            # READ ALOUD FEATURE
+            # READ ALOUD BUTTON
 
             if message["role"] == "assistant":
 
@@ -807,7 +812,7 @@ elif page == "AI Health Chat":
 
                         st.error("Voice generation failed.")
 
-                # DISPLAY GENERATED AUDIO
+                # AUDIO PLAYER
 
                 if st.session_state.spoken_message_index == i:
 
@@ -818,7 +823,7 @@ elif page == "AI Health Chat":
                             format="audio/mp3"
                         )
 
-    # INTEGRATED TEXT AND MICROPHONE INPUT
+    # TEXT AND MICROPHONE INPUT
 
     prompt = st.chat_input(
         "Ask anything about your health...",
@@ -826,8 +831,6 @@ elif page == "AI Health Chat":
         audio_sample_rate=16000,
         key="health_chat_input"
     )
-
-    # PROCESS USER INPUT
 
     if prompt:
 
@@ -864,7 +867,7 @@ elif page == "AI Health Chat":
 
             question = prompt.text.strip()
 
-        # SEND TO AI
+        # SEND QUESTION
 
         if question:
 
