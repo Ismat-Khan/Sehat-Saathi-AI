@@ -21,16 +21,19 @@ from agents.voice_agent import transcribe_audio, speak_response
 st.set_page_config(
     page_title="Sehat Saathi AI",
     page_icon="💚",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="auto"
 )
 
 
 # ==========================================
-# LIGHT AND DARK MODE STYLING
+# RESPONSIVE DESIGN - LIGHT AND DARK MODE
 # ==========================================
 
 st.markdown("""
 <style>
+
+/* GENERAL APPLICATION */
 
 .stApp {
     background-color: var(--background-color);
@@ -57,6 +60,8 @@ st.markdown("""
     font-weight: 800;
 }
 
+/* SIDEBAR */
+
 [data-testid="stSidebar"] {
     background-color: var(--secondary-background-color);
 }
@@ -70,10 +75,12 @@ st.markdown("""
     color: var(--text-color) !important;
 }
 
-[data-testid="stSidebar"] h1 {
+[data-testid="stSidebar"] h2 {
     color: var(--primary-color) !important;
     font-weight: 800;
 }
+
+/* INPUTS */
 
 .stTextInput input,
 .stTextArea textarea,
@@ -82,13 +89,16 @@ st.markdown("""
     color: var(--text-color) !important;
     border: 1px solid var(--primary-color) !important;
     border-radius: 10px;
+    font-size: 16px !important;
 }
 
 .stTextInput input::placeholder,
 .stTextArea textarea::placeholder {
     color: var(--text-color) !important;
-    opacity: 0.6;
+    opacity: 0.65;
 }
+
+/* SELECT BOX */
 
 .stSelectbox [data-baseweb="select"] > div {
     background-color: var(--secondary-background-color) !important;
@@ -96,10 +106,16 @@ st.markdown("""
     border-color: var(--primary-color) !important;
 }
 
+/* BUTTONS */
+
 div.stButton > button {
     border-radius: 10px;
     font-weight: 600;
+    min-height: 42px;
+    transition: all 0.2s ease;
 }
+
+/* FILE UPLOADER */
 
 [data-testid="stFileUploader"] {
     background-color: var(--secondary-background-color);
@@ -108,28 +124,233 @@ div.stButton > button {
     padding: 10px;
 }
 
+/* CHAT MESSAGES */
+
 [data-testid="stChatMessage"] {
     background-color: var(--secondary-background-color);
     color: var(--text-color);
     border: 1px solid var(--primary-color);
     border-radius: 14px;
+    padding: 12px;
 }
+
+/* CHAT INPUT */
+
+[data-testid="stChatInput"] {
+    width: 100%;
+}
+
+/* IMAGES */
+
+[data-testid="stImage"] img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+/* ALERTS */
 
 [data-testid="stAlert"] {
     border-radius: 12px;
 }
+
+/* DIVIDERS */
 
 hr {
     border-color: var(--text-color);
     opacity: 0.2;
 }
 
+/* LINKS */
+
 a {
     color: var(--primary-color) !important;
 }
 
+/* AUDIO PLAYER */
+
+audio {
+    max-width: 100%;
+}
+
+/* HIDE FOOTER */
+
 footer {
     visibility: hidden;
+}
+
+
+/* ==========================================
+   TABLET AND MOBILE RESPONSIVENESS
+   ========================================== */
+
+@media screen and (max-width: 768px) {
+
+    /* MAIN CONTENT AREA */
+
+    [data-testid="stMainBlockContainer"] {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-top: 1rem !important;
+        max-width: 100% !important;
+    }
+
+    /* HEADINGS */
+
+    .main-title {
+        font-size: 27px !important;
+        line-height: 1.3 !important;
+    }
+
+    h1 {
+        font-size: 26px !important;
+        line-height: 1.3 !important;
+    }
+
+    h2 {
+        font-size: 22px !important;
+    }
+
+    h3 {
+        font-size: 19px !important;
+    }
+
+    /* TEXT */
+
+    p, label, li {
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    /* STACK COLUMNS */
+
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 0.7rem !important;
+    }
+
+    [data-testid="column"] {
+        min-width: 100% !important;
+        width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+
+    /* BUTTONS */
+
+    div.stButton > button {
+        width: 100% !important;
+        min-height: 44px;
+        font-size: 15px !important;
+    }
+
+    /* INPUTS */
+
+    .stTextInput input,
+    .stTextArea textarea,
+    .stNumberInput input {
+        font-size: 16px !important;
+        min-height: 44px;
+    }
+
+    /* FILE UPLOADER */
+
+    [data-testid="stFileUploader"] {
+        width: 100% !important;
+        padding: 8px !important;
+    }
+
+    /* SIDEBAR */
+
+    [data-testid="stSidebar"] {
+        min-width: 0 !important;
+        max-width: 85vw !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+        gap: 0.5rem !important;
+    }
+
+    [data-testid="stSidebar"] h2 {
+        font-size: 22px !important;
+        margin-bottom: 2px !important;
+    }
+
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] label {
+        font-size: 14px !important;
+    }
+
+    [data-testid="stSidebar"] [data-testid="stRadio"] label {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+
+    /* CHAT MESSAGES */
+
+    [data-testid="stChatMessage"] {
+        padding: 9px !important;
+        border-radius: 12px !important;
+    }
+
+    /* CHAT INPUT */
+
+    [data-testid="stChatInput"] {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* AUDIO */
+
+    audio {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* PREVENT HORIZONTAL SCROLLING */
+
+    .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"],
+    [data-testid="stMainBlockContainer"] {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+}
+
+
+/* ==========================================
+   SMALL MOBILE PHONES
+   ========================================== */
+
+@media screen and (max-width: 480px) {
+
+    [data-testid="stMainBlockContainer"] {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .main-title {
+        font-size: 24px !important;
+    }
+
+    h1 {
+        font-size: 23px !important;
+    }
+
+    h2 {
+        font-size: 20px !important;
+    }
+
+    [data-testid="stSidebar"] {
+        max-width: 88vw !important;
+    }
+
+    [data-testid="stChatMessage"] {
+        padding: 8px !important;
+    }
+
 }
 
 </style>
@@ -217,17 +438,22 @@ def submit_chat_question(question, language):
 
 
 # ==========================================
-# SIDEBAR
+# SIDEBAR — RESPONSIVE NAVIGATION
 # ==========================================
 
 with st.sidebar:
 
-    st.markdown("# 💚 Sehat Saathi AI")
+    st.markdown(
+        "<h2>💚 Sehat Saathi AI</h2>",
+        unsafe_allow_html=True
+    )
 
     st.caption("Your Intelligent Healthcare Companion")
 
+    st.divider()
+
     language = st.selectbox(
-        "🌐 Select Language / زبان منتخب کریں",
+        "🌐 Language / زبان",
         ["English", "Urdu"],
         index=0 if st.session_state.language == "English" else 1
     )
@@ -236,8 +462,10 @@ with st.sidebar:
 
     st.divider()
 
+    st.markdown("### Navigation")
+
     page = st.radio(
-        "Navigation",
+        "Choose a section",
         [
             "Home",
             "Medical Report Analysis",
@@ -245,14 +473,18 @@ with st.sidebar:
             "AI Health Chat",
             "Diet & Nutrition",
             "Health Summary"
-        ]
+        ],
+        label_visibility="collapsed"
     )
 
     st.divider()
 
     st.caption("Powered by Groq AI")
 
-    if st.button("Clear Chat History", use_container_width=True):
+    if st.button(
+        "Clear Chat History",
+        use_container_width=True
+    ):
 
         st.session_state.messages = []
         st.session_state.spoken_audio = None
@@ -531,7 +763,7 @@ elif page == "Medicine Scanner":
 
 
 # ==========================================
-# AI HEALTH CHAT — INTEGRATED MICROPHONE
+# AI HEALTH CHAT — BUILT-IN MICROPHONE
 # ==========================================
 
 elif page == "AI Health Chat":
@@ -542,9 +774,7 @@ elif page == "AI Health Chat":
         "Ask your health questions in English or Urdu."
     )
 
-    # --------------------------------------
     # DISPLAY CHAT HISTORY
-    # --------------------------------------
 
     for i, message in enumerate(st.session_state.messages):
 
@@ -552,7 +782,8 @@ elif page == "AI Health Chat":
 
             st.write(message["content"])
 
-            # Read aloud option for AI responses
+            # READ ALOUD FEATURE
+
             if message["role"] == "assistant":
 
                 if st.button(
@@ -570,16 +801,14 @@ elif page == "AI Health Chat":
                     if audio_bytes:
 
                         st.session_state.spoken_audio = audio_bytes
-
                         st.session_state.spoken_message_index = i
 
                     else:
 
-                        st.error(
-                            "Voice generation failed. Please try again."
-                        )
+                        st.error("Voice generation failed.")
 
-                # Show audio player for selected response
+                # DISPLAY GENERATED AUDIO
+
                 if st.session_state.spoken_message_index == i:
 
                     if st.session_state.spoken_audio:
@@ -589,9 +818,7 @@ elif page == "AI Health Chat":
                             format="audio/mp3"
                         )
 
-    # --------------------------------------
-    # CHAT INPUT WITH BUILT-IN MICROPHONE
-    # --------------------------------------
+    # INTEGRATED TEXT AND MICROPHONE INPUT
 
     prompt = st.chat_input(
         "Ask anything about your health...",
@@ -600,15 +827,14 @@ elif page == "AI Health Chat":
         key="health_chat_input"
     )
 
-    # --------------------------------------
-    # PROCESS USER SUBMISSION
-    # --------------------------------------
+    # PROCESS USER INPUT
 
     if prompt:
 
         question = ""
 
-        # If the user recorded a voice message
+        # VOICE INPUT
+
         if prompt.audio:
 
             with st.spinner("Converting your voice into text..."):
@@ -632,12 +858,14 @@ elif page == "AI Health Chat":
 
             st.caption("🎙️ Voice transcription: " + question)
 
-        # If the user typed a message
+        # TEXT INPUT
+
         elif prompt.text:
 
             question = prompt.text.strip()
 
-        # Send the question to the AI
+        # SEND TO AI
+
         if question:
 
             submit_chat_question(
@@ -646,7 +874,6 @@ elif page == "AI Health Chat":
             )
 
             st.session_state.spoken_audio = None
-
             st.session_state.spoken_message_index = None
 
             st.rerun()
