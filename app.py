@@ -27,7 +27,7 @@ st.set_page_config(
 
 
 # ==========================================
-# RESPONSIVE CSS - LIGHT AND DARK MODE
+# CSS - SIDEBAR AND HOME PAGE DESIGN
 # ==========================================
 
 st.markdown("""
@@ -49,7 +49,7 @@ st.markdown("""
     max-width: 100%;
 }
 
-/* MAIN HEADINGS */
+/* MAIN HEADING */
 
 .main-title {
     color: var(--primary-color) !important;
@@ -58,17 +58,34 @@ st.markdown("""
     line-height: 1.3;
 }
 
-/* SIDEBAR */
+
+/* ==========================================
+   SOLID SIDEBAR BACKGROUND
+   ========================================== */
+
+/* Use the actual active Streamlit theme background.
+   This is opaque, not transparent. */
 
 [data-testid="stSidebar"] {
-    background-color: var(--secondary-background-color) !important;
+    background-color: var(--background-color) !important;
+    opacity: 1 !important;
     z-index: 1001 !important;
+    isolation: isolate;
+    backdrop-filter: none !important;
 }
 
-[data-testid="stSidebar"] > div,
-[data-testid="stSidebarContent"] {
-    background-color: var(--secondary-background-color) !important;
+[data-testid="stSidebar"] > div {
+    background-color: var(--background-color) !important;
+    opacity: 1 !important;
 }
+
+[data-testid="stSidebarContent"],
+[data-testid="stSidebarUserContent"] {
+    background-color: var(--background-color) !important;
+    opacity: 1 !important;
+}
+
+/* Sidebar text follows active theme */
 
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
@@ -84,6 +101,8 @@ st.markdown("""
     font-weight: 800;
 }
 
+/* Navigation options */
+
 [data-testid="stSidebar"] [data-testid="stRadio"] {
     width: 100%;
 }
@@ -92,12 +111,99 @@ st.markdown("""
     display: flex !important;
     align-items: center !important;
     white-space: normal !important;
-    overflow-wrap: anywhere;
-    line-height: 1.4 !important;
-    padding: 7px 4px !important;
+    overflow-wrap: anywhere !important;
+    line-height: 1.5 !important;
+    padding: 9px 5px !important;
 }
 
-/* INPUT FIELDS */
+
+/* ==========================================
+   HOME PAGE PASTEL FEATURE CARDS
+   ========================================== */
+
+/* Medical Report - Pastel Blue */
+
+.st-key-home_report_card {
+    background-color: #EAF3FF !important;
+    border: 1px solid #D4E5FC !important;
+    border-radius: 16px !important;
+    padding: 18px !important;
+}
+
+.st-key-home_report_card h3,
+.st-key-home_report_card p {
+    color: #315B91 !important;
+}
+
+/* Medicine Scanner - Pastel Green */
+
+.st-key-home_medicine_card {
+    background-color: #EAF8F0 !important;
+    border: 1px solid #D0EEDD !important;
+    border-radius: 16px !important;
+    padding: 18px !important;
+}
+
+.st-key-home_medicine_card h3,
+.st-key-home_medicine_card p {
+    color: #286447 !important;
+}
+
+/* AI Health Chat - Pastel Purple */
+
+.st-key-home_chat_card {
+    background-color: #F2ECFF !important;
+    border: 1px solid #E1D5FA !important;
+    border-radius: 16px !important;
+    padding: 18px !important;
+}
+
+.st-key-home_chat_card h3,
+.st-key-home_chat_card p {
+    color: #62458D !important;
+}
+
+/* Diet - Pastel Orange */
+
+.st-key-home_diet_card {
+    background-color: #FFF4E5 !important;
+    border: 1px solid #F6E2C5 !important;
+    border-radius: 16px !important;
+    padding: 18px !important;
+}
+
+.st-key-home_diet_card h3,
+.st-key-home_diet_card p {
+    color: #85551F !important;
+}
+
+/* Health Summary - Pastel Teal */
+
+.st-key-home_summary_card {
+    background-color: #E8F7F8 !important;
+    border: 1px solid #D0EBED !important;
+    border-radius: 16px !important;
+    padding: 18px !important;
+}
+
+.st-key-home_summary_card h3,
+.st-key-home_summary_card p {
+    color: #28636A !important;
+}
+
+/* Buttons */
+
+div.stButton > button {
+    border-radius: 10px;
+    font-weight: 600;
+    min-height: 44px;
+    transition: all 0.2s ease;
+}
+
+
+/* ==========================================
+   INPUT FIELDS
+   ========================================== */
 
 .stTextInput input,
 .stTextArea textarea,
@@ -114,15 +220,6 @@ st.markdown("""
 .stSelectbox [data-baseweb="select"] > div {
     background-color: var(--secondary-background-color) !important;
     color: var(--text-color) !important;
-}
-
-/* BUTTONS */
-
-div.stButton > button {
-    border-radius: 10px;
-    font-weight: 600;
-    min-height: 44px;
-    transition: all 0.2s ease;
 }
 
 /* FILE UPLOADER */
@@ -172,13 +269,9 @@ hr {
     opacity: 0.2;
 }
 
-/* LINKS */
-
 a {
     color: var(--primary-color) !important;
 }
-
-/* FOOTER */
 
 footer {
     visibility: hidden;
@@ -186,19 +279,15 @@ footer {
 
 
 /* ==========================================
-   TABLET AND MOBILE
+   MOBILE RESPONSIVENESS
    ========================================== */
 
 @media screen and (max-width: 768px) {
-
-    /* MAIN CONTENT */
 
     [data-testid="stMainBlockContainer"] {
         padding: 1rem !important;
         max-width: 100% !important;
     }
-
-    /* HEADINGS */
 
     .main-title {
         font-size: 27px !important;
@@ -218,22 +307,16 @@ footer {
         font-size: 19px !important;
     }
 
-    /* TEXT */
-
     p, label, li {
         font-size: 15px;
         line-height: 1.6;
     }
-
-    /* BUTTONS */
 
     div.stButton > button {
         width: 100% !important;
         min-height: 46px;
         font-size: 15px !important;
     }
-
-    /* INPUTS */
 
     .stTextInput input,
     .stTextArea textarea,
@@ -242,19 +325,14 @@ footer {
         min-height: 44px;
     }
 
-    /* SIDEBAR */
+    /* Solid mobile sidebar */
 
-    [data-testid="stSidebar"] {
-        background-color: var(--secondary-background-color) !important;
-    }
-
+    [data-testid="stSidebar"],
     [data-testid="stSidebar"] > div,
-    [data-testid="stSidebarContent"] {
-        background-color: var(--secondary-background-color) !important;
-    }
-
-    [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        gap: 0.6rem !important;
+    [data-testid="stSidebarContent"],
+    [data-testid="stSidebarUserContent"] {
+        background-color: var(--background-color) !important;
+        opacity: 1 !important;
     }
 
     [data-testid="stSidebar"] h2 {
@@ -267,11 +345,9 @@ footer {
     }
 
     [data-testid="stSidebar"] [data-testid="stRadio"] label {
-        padding: 8px 4px !important;
+        padding: 9px 5px !important;
         line-height: 1.5 !important;
     }
-
-    /* CHAT */
 
     [data-testid="stChatMessage"] {
         padding: 9px !important;
@@ -281,12 +357,21 @@ footer {
         width: 100% !important;
     }
 
+    /* Pastel cards fit mobile width */
+
+    .st-key-home_report_card,
+    .st-key-home_medicine_card,
+    .st-key-home_chat_card,
+    .st-key-home_diet_card,
+    .st-key-home_summary_card {
+        width: 100% !important;
+        padding: 14px !important;
+        box-sizing: border-box !important;
+    }
 }
 
 
-/* ==========================================
-   SMALL MOBILE PHONES
-   ========================================== */
+/* SMALL PHONES */
 
 @media screen and (max-width: 480px) {
 
@@ -305,7 +390,6 @@ footer {
     h2 {
         font-size: 20px !important;
     }
-
 }
 
 </style>
@@ -352,11 +436,14 @@ def submit_chat_question(question, language):
     if check_emergency(question):
 
         if language == "Urdu":
+
             emergency_message = (
                 "ممکنہ طبی ایمرجنسی۔ فوراً مقامی ایمرجنسی سروس "
                 "سے رابطہ کریں یا قریبی ہسپتال کے ایمرجنسی ڈیپارٹمنٹ جائیں۔"
             )
+
         else:
+
             emergency_message = (
                 "Possible medical emergency. Contact local emergency "
                 "services or go to the nearest emergency department "
@@ -397,7 +484,7 @@ def submit_chat_question(question, language):
 
 
 # ==========================================
-# SIDEBAR - MOBILE FRIENDLY NAVIGATION
+# SIDEBAR NAVIGATION
 # ==========================================
 
 with st.sidebar:
@@ -454,7 +541,7 @@ with st.sidebar:
 
 
 # ==========================================
-# HOME PAGE - CLICKABLE FEATURE CARDS
+# HOME PAGE - CLICKABLE PASTEL CARDS
 # ==========================================
 
 if page == "Home":
@@ -474,9 +561,12 @@ if page == "Home":
 
     st.markdown("### Explore Our Features")
 
-    # MEDICAL REPORT ANALYSIS
+    # MEDICAL REPORT CARD
 
-    with st.container(border=True):
+    with st.container(
+        border=True,
+        key="home_report_card"
+    ):
 
         st.markdown("### 🩻 Medical Report Analysis")
 
@@ -492,9 +582,12 @@ if page == "Home":
             args=("Medical Report Analysis",)
         )
 
-    # MEDICINE SCANNER
+    # MEDICINE SCANNER CARD
 
-    with st.container(border=True):
+    with st.container(
+        border=True,
+        key="home_medicine_card"
+    ):
 
         st.markdown("### 💊 Medicine Scanner")
 
@@ -510,9 +603,12 @@ if page == "Home":
             args=("Medicine Scanner",)
         )
 
-    # AI HEALTH CHAT
+    # AI HEALTH CHAT CARD
 
-    with st.container(border=True):
+    with st.container(
+        border=True,
+        key="home_chat_card"
+    ):
 
         st.markdown("### 💬 AI Health Chat")
 
@@ -528,9 +624,12 @@ if page == "Home":
             args=("AI Health Chat",)
         )
 
-    # DIET AND NUTRITION
+    # DIET CARD
 
-    with st.container(border=True):
+    with st.container(
+        border=True,
+        key="home_diet_card"
+    ):
 
         st.markdown("### 🥗 Diet & Nutrition")
 
@@ -546,9 +645,12 @@ if page == "Home":
             args=("Diet & Nutrition",)
         )
 
-    # HEALTH SUMMARY
+    # HEALTH SUMMARY CARD
 
-    with st.container(border=True):
+    with st.container(
+        border=True,
+        key="home_summary_card"
+    ):
 
         st.markdown("### 📋 Health Summary")
 
@@ -787,7 +889,7 @@ elif page == "AI Health Chat":
 
             st.write(message["content"])
 
-            # READ ALOUD BUTTON
+            # READ ALOUD
 
             if message["role"] == "assistant":
 
