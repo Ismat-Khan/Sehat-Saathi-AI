@@ -26,7 +26,7 @@ st.set_page_config(
 
 
 # ==========================================
-# CSS - THEME, SIDEBAR AND RESPONSIVENESS
+# CSS - RESPONSIVE DESIGN AND COLORS
 # ==========================================
 
 st.markdown("""
@@ -48,6 +48,7 @@ st.markdown("""
     max-width: 100%;
 }
 
+
 /* MAIN HEADING */
 
 .main-title {
@@ -59,7 +60,7 @@ st.markdown("""
 
 
 /* ==========================================
-   SIDEBAR - SOLID THEME-AWARE BACKGROUND
+   SIDEBAR - SOLID BACKGROUND
    ========================================== */
 
 [data-testid="stSidebar"] {
@@ -77,8 +78,6 @@ st.markdown("""
     opacity: 1 !important;
 }
 
-/* Sidebar text */
-
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] label,
@@ -92,8 +91,6 @@ st.markdown("""
     color: var(--primary-color) !important;
     font-weight: 800;
 }
-
-/* Radio navigation spacing */
 
 [data-testid="stSidebar"] [data-testid="stRadio"] {
     width: 100%;
@@ -109,8 +106,6 @@ st.markdown("""
     margin-bottom: 5px !important;
 }
 
-/* Sidebar select box */
-
 [data-testid="stSidebar"] [data-baseweb="select"] > div {
     background-color: var(--secondary-background-color) !important;
     color: var(--text-color) !important;
@@ -118,37 +113,30 @@ st.markdown("""
 
 
 /* ==========================================
-   BUTTONS - CLEAR IN BOTH THEMES
+   DEFAULT BUTTONS
    ========================================== */
 
-/* Primary buttons only */
+/* Other primary buttons */
 
 button[kind="primary"] {
-    background-color: #315F9B !important;
-    color: #FFFFFF !important;
-    border: 1px solid #315F9B !important;
+    background-color: var(--primary-color) !important;
+    color: white !important;
     border-radius: 10px !important;
     font-weight: 600 !important;
     min-height: 44px;
 }
 
-button[kind="primary"]:hover {
-    background-color: #244A7D !important;
-    color: #FFFFFF !important;
-    border-color: #244A7D !important;
-}
-
 button[kind="primary"] p,
 button[kind="primary"] span {
-    color: #FFFFFF !important;
+    color: white !important;
 }
 
 
 /* ==========================================
-   HOME PAGE - PASTEL FEATURE CARDS
+   HOME FEATURE CARD COLORS
    ========================================== */
 
-/* Medical Report - Blue */
+/* Medical Report - Light Blue */
 
 .st-key-home_report_card {
     background-color: #EAF3FF !important;
@@ -163,7 +151,8 @@ button[kind="primary"] span {
     color: #315B91 !important;
 }
 
-/* Medicine Scanner - Green */
+
+/* Medicine Scanner - Light Green */
 
 .st-key-home_medicine_card {
     background-color: #EAF8F0 !important;
@@ -178,7 +167,8 @@ button[kind="primary"] span {
     color: #286447 !important;
 }
 
-/* AI Chat - Purple */
+
+/* AI Health Chat - Light Purple */
 
 .st-key-home_chat_card {
     background-color: #F2ECFF !important;
@@ -193,7 +183,8 @@ button[kind="primary"] span {
     color: #62458D !important;
 }
 
-/* Diet - Orange */
+
+/* Diet & Nutrition - Light Orange */
 
 .st-key-home_diet_card {
     background-color: #FFF4E5 !important;
@@ -208,14 +199,114 @@ button[kind="primary"] span {
     color: #85551F !important;
 }
 
-/* Health Summary - Teal */
+
+/* Health Summary - Light Teal */
 
 .st-key-home_summary_card {
     background-color: #E8F7F8 !important;
     border: 1px solid #D0EBED !important;
     border-radius: 16px !important;
     padding: 16px !important;
-    min-height: 220px;
+}
+
+.st-key-home_summary_card h3,
+.st-key-home_summary_card p {
+    color: #28636A !important;
+}
+
+
+/* ==========================================
+   INDIVIDUAL FEATURE BUTTON COLORS
+   ========================================== */
+
+/* Medical Report - Blue */
+
+.st-key-home_report_card button {
+    background-color: #315B91 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #315B91 !important;
+}
+
+.st-key-home_report_card button:hover {
+    background-color: #244675 !important;
+    color: #FFFFFF !important;
+    border-color: #244675 !important;
+}
+
+
+/* Medicine Scanner - Green */
+
+.st-key-home_medicine_card button {
+    background-color: #286447 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #286447 !important;
+}
+
+.st-key-home_medicine_card button:hover {
+    background-color: #1D4D35 !important;
+    color: #FFFFFF !important;
+    border-color: #1D4D35 !important;
+}
+
+
+/* AI Health Chat - Purple */
+
+.st-key-home_chat_card button {
+    background-color: #62458D !important;
+    color: #FFFFFF !important;
+    border: 1px solid #62458D !important;
+}
+
+.st-key-home_chat_card button:hover {
+    background-color: #4D3474 !important;
+    color: #FFFFFF !important;
+    border-color: #4D3474 !important;
+}
+
+
+/* Diet & Nutrition - Orange */
+
+.st-key-home_diet_card button {
+    background-color: #85551F !important;
+    color: #FFFFFF !important;
+    border: 1px solid #85551F !important;
+}
+
+.st-key-home_diet_card button:hover {
+    background-color: #694016 !important;
+    color: #FFFFFF !important;
+    border-color: #694016 !important;
+}
+
+
+/* Health Summary - Teal */
+
+.st-key-home_summary_card button {
+    background-color: #28636A !important;
+    color: #FFFFFF !important;
+    border: 1px solid #28636A !important;
+}
+
+.st-key-home_summary_card button:hover {
+    background-color: #1D4C52 !important;
+    color: #FFFFFF !important;
+    border-color: #1D4C52 !important;
+}
+
+
+/* Keep all feature button text white */
+
+.st-key-home_report_card button p,
+.st-key-home_report_card button span,
+.st-key-home_medicine_card button p,
+.st-key-home_medicine_card button span,
+.st-key-home_chat_card button p,
+.st-key-home_chat_card button span,
+.st-key-home_diet_card button p,
+.st-key-home_diet_card button span,
+.st-key-home_summary_card button p,
+.st-key-home_summary_card button span {
+    color: #FFFFFF !important;
 }
 
 
@@ -324,8 +415,6 @@ footer {
         line-height: 1.6;
     }
 
-    /* Solid mobile sidebar */
-
     [data-testid="stSidebar"],
     [data-testid="stSidebar"] > div,
     [data-testid="stSidebarContent"],
@@ -347,8 +436,6 @@ footer {
         padding: 9px 5px !important;
         line-height: 1.5 !important;
     }
-
-    /* Feature card spacing */
 
     .st-key-home_report_card,
     .st-key-home_medicine_card,
@@ -374,7 +461,7 @@ footer {
 
 
 /* ==========================================
-   SMALL PHONES - NEAT CARD STACKING
+   SMALL PHONES
    ========================================== */
 
 @media screen and (max-width: 480px) {
@@ -395,7 +482,7 @@ footer {
         font-size: 20px !important;
     }
 
-    /* Two-column grid becomes one column on narrow phones */
+    /* Stack feature cards on narrow phones */
 
     [data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
@@ -407,7 +494,6 @@ footer {
         width: 100% !important;
         flex: 1 1 100% !important;
     }
-
 }
 
 </style>
